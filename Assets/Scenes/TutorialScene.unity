@@ -733,6 +733,7 @@ GameObject:
   - component: {fileID: 1115944573}
   - component: {fileID: 1115944575}
   - component: {fileID: 1115944574}
+  - component: {fileID: 1115944576}
   m_Layer: 5
   m_Name: FeadBackText
   m_TagString: Untagged
@@ -856,6 +857,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1115944572}
   m_CullTransparentMesh: 1
+--- !u!225 &1115944576
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1115944572}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1138622844
 GameObject:
   m_ObjectHideFlags: 0
@@ -1024,9 +1037,12 @@ MonoBehaviour:
   feedbackText: {fileID: 1115944574}
   npcBubble: {fileID: 1317205772}
   desktopIconsPanel: {fileID: 502597613}
+  inputFieldTransform: {fileID: 1864308682}
   correctPassword: 88888888
   fadeDuration: 0.5
   stayDuration: 3
+  shakeDuration: 0.25
+  shakeMagnitude: 8
 --- !u!4 &1196809221
 Transform:
   m_ObjectHideFlags: 0

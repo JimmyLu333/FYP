@@ -11,20 +11,27 @@ public class PasswordSystem : MonoBehaviour
     public TextMeshProUGUI feedbackText;
     public GameObject npcBubble;
     public GameObject desktopIconsPanel;
+    public RectTransform inputFieldTransform;
 
     [Header("设置")]
     public string correctPassword = "88888888";
 
     [Header("气泡设置")]
-    public float fadeDuration = 0.5f;   // 淡入淡出时间
-    public float stayDuration = 3f;     // 停留时间
+    public float fadeDuration = 0.5f;
+    public float stayDuration = 3f;
+
+    [Header("震动设置")]
+    public float shakeDuration = 0.25f;
+    public float shakeMagnitude = 8f;
 
     private CanvasGroup npcCanvasGroup;
-    private Coroutine bubbleCoroutine;   // 用来记录当前气泡协程
+    private Coroutine bubbleCoroutine;
+    private Coroutine shakeCoroutine;
 
     void Start()
     {
         feedbackText.text = "";
+        feedbackText.gameObject.SetActive(false);
         desktopIconsPanel.SetActive(false);
 
         npcBubble.SetActive(true);
@@ -46,28 +53,30 @@ public class PasswordSystem : MonoBehaviour
     {
         if (inputField.text == correctPassword)
         {
-            feedbackText.text = "密码正确，进入电脑桌面！";
-            feedbackText.color = Color.green;
             UnlockDesktop();
         }
         else
         {
-            feedbackText.text = "密码错误，请再试一次。";
-            feedbackText.color = Color.red;
-
+            ShowErrorFeedback();
             ShowBubbleSafely();
+            StartShake();
         }
+    }
+
+    void ShowErrorFeedback()
+    {
+        feedbackText.gameObject.SetActive(true);
+        feedbackText.text = "密码错误，请再试一次。";
+        feedbackText.color = Color.red;
     }
 
     void ShowBubbleSafely()
     {
-        // 如果之前已经有气泡动画在运行，先停掉
         if (bubbleCoroutine != null)
         {
             StopCoroutine(bubbleCoroutine);
         }
 
-        // 重新开始一次新的完整显示流程
         bubbleCoroutine = StartCoroutine(BubbleRoutine());
     }
 
@@ -75,7 +84,6 @@ public class PasswordSystem : MonoBehaviour
     {
         npcBubble.SetActive(true);
 
-        // 每次重新显示时，先从当前透明度继续往 1 走
         float startAlpha = npcCanvasGroup.alpha;
         float time = 0f;
 
@@ -88,10 +96,8 @@ public class PasswordSystem : MonoBehaviour
 
         npcCanvasGroup.alpha = 1f;
 
-        // 停留一段时间
         yield return new WaitForSeconds(stayDuration);
 
-        // 淡出
         time = 0f;
         startAlpha = npcCanvasGroup.alpha;
 
@@ -107,11 +113,41 @@ public class PasswordSystem : MonoBehaviour
         bubbleCoroutine = null;
     }
 
+    void StartShake()
+    {
+        if (shakeCoroutine != null)
+        {
+            StopCoroutine(shakeCoroutine);
+        }
+
+        shakeCoroutine = StartCoroutine(ShakeUI());
+    }
+
+    IEnumerator ShakeUI()
+    {
+        Vector3 originalPos = inputFieldTransform.localPosition;
+        float time = 0f;
+
+        while (time < shakeDuration)
+        {
+            time += Time.deltaTime;
+
+            float offsetX = Random.Range(-1f, 1f) * shakeMagnitude;
+            inputFieldTransform.localPosition = originalPos + new Vector3(offsetX, 0f, 0f);
+
+            yield return null;
+        }
+
+        inputFieldTransform.localPosition = originalPos;
+        shakeCoroutine = null;
+    }
+
     void UnlockDesktop()
     {
         inputField.gameObject.SetActive(false);
         submitButton.gameObject.SetActive(false);
-
+        feedbackText.gameObject.SetActive(false);
+        npcBubble.gameObject.SetActive(false);
         desktopIconsPanel.SetActive(true);
     }
 }
