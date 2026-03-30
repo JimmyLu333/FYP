@@ -12,6 +12,7 @@ public class PasswordSystem : MonoBehaviour
     public GameObject npcBubble;
     public GameObject desktopIconsPanel;
     public RectTransform inputFieldTransform;
+    public GameObject computer;
 
     [Header("…Ë÷√")]
     public string correctPassword = "88888888";
@@ -144,6 +145,7 @@ public class PasswordSystem : MonoBehaviour
 
     void UnlockDesktop()
     {
+        computer.SetActive(false);
         inputField.gameObject.SetActive(false);
         submitButton.gameObject.SetActive(false);
         feedbackText.gameObject.SetActive(false);

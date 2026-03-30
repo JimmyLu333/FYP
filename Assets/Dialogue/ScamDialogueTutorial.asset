@@ -100,7 +100,7 @@ MonoBehaviour:
   - id: 1
     fields:
     - title: Title
-      value: ScamTutorial
+      value: ScamChatExample
       type: 0
       typeString: CustomFieldType_Text
     - title: Description
@@ -218,11 +218,11 @@ MonoBehaviour:
         type: 5
         typeString: CustomFieldType_Actor
       - title: Menu Text
-        value: 
+        value: "\u4F84\u5B50\u554A\uFF0C\u6211\u662F\u4F60\u8205\u8205\u738B\u4ECE\u5FC3\u554A\uFF0C\u8FD8\u8BB0\u5F97\u6211\u4E0D\uFF1F"
         type: 0
         typeString: 
       - title: Dialogue Text
-        value: "\u4F84\u5B50\u554A\uFF0C\u6211\u662F\u4F60\u8205\u8205\u738B\u4ECE\u5FC3\u554A\uFF0C\u8FD8\u8BB0\u5F97\u6211\u4E0D\uFF1F"
+        value: 
         type: 0
         typeString: 
       - title: Sequence
@@ -277,7 +277,7 @@ MonoBehaviour:
         type: 0
         typeString: 
       - title: Dialogue Text
-        value: "\u8BB0\u5F97\u8BB0\u5F97\uFF0C\u524D\u51E0\u5E74\u6211\u8BB0\u5F97\u60A8\u8FD8\u6765\u8FC7\u6211\u4EEC\u5BB6\u8FC7\u5E74\u5462\n"
+        value: "\u8BB0\u5F97\u8BB0\u5F97\uFF0C\u524D\u51E0\u5E74\u6211\u8BB0\u5F97\u60A8\u8FD8\u6765\u8FC7\u6211\u4EEC\u5BB6\u8FC7\u5E74\u5462"
         type: 0
         typeString: 
       - title: Sequence
@@ -334,11 +334,11 @@ MonoBehaviour:
         type: 5
         typeString: CustomFieldType_Actor
       - title: Menu Text
-        value: 
+        value: "\u8BF6\u5440\u662F\u6211\u662F\u6211\uFF0C\u6211\u6700\u8FD1\u542C\u8BF4\u4F60\u521A\u6BD5\u4E1A\u662F\u4E0D\u662F\u4E0D\u597D\u627E\u5DE5\u4F5C\uFF0C\u8205\u8205\u8FD9\u6709\u4E00\u4EFD\u4E0D\u9519\u7684\u5DE5\u4F5C\u4E0D\u77E5\u9053\u4F60\u6562\u4E0D\u6562\u5174\u8DA3"
         type: 0
         typeString: 
       - title: Dialogue Text
-        value: "\u8BF6\u5440\u662F\u6211\u662F\u6211\uFF0C\u6211\u6700\u8FD1\u542C\u8BF4\u4F60\u521A\u6BD5\u4E1A\u662F\u4E0D\u662F\u4E0D\u597D\u627E\u5DE5\u4F5C\uFF0C\u8205\u8205\u8FD9\u6709\u4E00\u4EFD\u4E0D\u9519\u7684\u5DE5\u4F5C\u4E0D\u77E5\u9053\u4F60\u6562\u4E0D\u6562\u5174\u8DA3"
+        value: 
         type: 0
         typeString: 
       - title: Sequence
@@ -415,8 +415,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 201.52737
-        y: 469.39737
+        x: 198.9957
+        y: 466.8657
         width: 160
         height: 30
     - id: 6
@@ -438,7 +438,7 @@ MonoBehaviour:
         type: 5
         typeString: CustomFieldType_Actor
       - title: Menu Text
-        value: 
+        value: "\u5BF9\u554A\u5BF9\u554A\uFF0C\u8FD9\u4E0D\u6765\u95EE\u95EE\u4F60\u6700\u8FD1\u600E\u4E48\u6837\u561B"
         type: 0
         typeString: 
       - title: Dialogue Text
@@ -470,13 +470,13 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 343.35257
+        x: 340.82095
         y: 351.66913
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 0, y: 0}
-    canvasZoom: 0.7000003
+    canvasScrollPosition: {x: 44.755817, y: 7.3236737}
+    canvasZoom: 0.7900002
   - id: 2
     fields:
     - title: Title
