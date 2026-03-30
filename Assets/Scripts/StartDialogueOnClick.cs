@@ -1,12 +1,15 @@
 using UnityEngine;
-using PixelCrushers.DialogueSystem;
 
 public class StartDialogueOnClick : MonoBehaviour
 {
+    public DialogueChatBridge dialogueChatBridge;
     public string conversationName = "ScamChatExample";
 
     public void StartChat()
     {
-        DialogueManager.StartConversation(conversationName);
+        if (dialogueChatBridge != null)
+        {
+            dialogueChatBridge.OpenChatAndStartConversation(conversationName);
+        }
     }
 }
