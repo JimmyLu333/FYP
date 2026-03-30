@@ -3230,6 +3230,7 @@ MonoBehaviour:
   contentRoot: {fileID: 1637164677}
   leftBubblePrefab: {fileID: 1283008772321842444, guid: 94002a347c4743f4bbe1ca90a9926e03, type: 3}
   rightBubblePrefab: {fileID: 2892153798305146208, guid: c47531f9d06dadd499c179bb42322b89, type: 3}
+  scrollRect: {fileID: 887284841}
 --- !u!1 &1862433023
 GameObject:
   m_ObjectHideFlags: 0
@@ -4160,6 +4161,9 @@ MonoBehaviour:
   choiceButtonText1: {fileID: 985442677}
   choiceButtonText2: {fileID: 270634025}
   choiceButtonText3: {fileID: 1079771926}
+  playerName: "\u738B\u4ECE\u5FC3"
+  npcName: "\u9648\u9ED8"
+  npcReplyDelay: 1.2
 --- !u!4 &2129102361
 Transform:
   m_ObjectHideFlags: 0
