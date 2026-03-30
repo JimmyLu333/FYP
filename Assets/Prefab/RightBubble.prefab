@@ -145,6 +145,7 @@ GameObject:
   - component: {fileID: 3610187406136314218}
   - component: {fileID: 4913812029250784898}
   - component: {fileID: 1763655880350622462}
+  - component: {fileID: 4304498689476470370}
   m_Layer: 5
   m_Name: RightBubble
   m_TagString: Untagged
@@ -200,6 +201,20 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &4304498689476470370
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2892153798305146208}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae01fdfffbb57fd4eaa0ac73846d7706, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speakerNameText: {fileID: 1335516005950846782}
+  messageText: {fileID: 4074472880142873062}
 --- !u!1 &6006958995040789072
 GameObject:
   m_ObjectHideFlags: 0

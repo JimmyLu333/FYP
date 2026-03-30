@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 using PixelCrushers.DialogueSystem;
 
 public class DialogueChatBridge : MonoBehaviour
@@ -20,23 +21,36 @@ public class DialogueChatBridge : MonoBehaviour
     public TextMeshProUGUI choiceButtonText2;
     public TextMeshProUGUI choiceButtonText3;
 
+    [Header("角色名")]
+    public string playerName = "陈默";
+    public string npcName = "王从心";
+
+    [Header("节奏设置")]
+    public float npcReplyDelay = 1.2f;
+
     private Response[] currentResponses;
+
+    // 防止玩家点击后，系统又重复生成一次玩家气泡
+    private bool suppressNextPlayerLine = false;
 
     private void Start()
     {
         HideChoiceButtons();
+
+        // 顶部固定显示聊天对象
+        if (nameText != null)
+        {
+            nameText.text = npcName;
+        }
     }
 
     public void OpenChatAndStartConversation(string conversationTitle)
     {
-        Debug.Log("OpenChatAndStartConversation 被调用了");
-
         HideDefaultDialogueUI();
 
         if (chatPanel != null)
         {
             chatPanel.SetActive(true);
-            Debug.Log("ChatPanel 已打开");
         }
         else
         {
@@ -44,7 +58,22 @@ public class DialogueChatBridge : MonoBehaviour
         }
 
         ClearOldChoices();
+
+        if (nameText != null)
+        {
+            nameText.text = npcName;
+        }
+
         DialogueManager.StartConversation(conversationTitle);
+    }
+
+    private void HideDefaultDialogueUI()
+    {
+        GameObject defaultUI = GameObject.Find("Default Dialogue UI");
+        if (defaultUI != null)
+        {
+            defaultUI.SetActive(false);
+        }
     }
 
     public void OnConversationLine(Subtitle subtitle)
@@ -54,16 +83,28 @@ public class DialogueChatBridge : MonoBehaviour
         string speakerName = subtitle.speakerInfo.Name;
         string lineText = subtitle.formattedText.text;
 
-        if (nameText != null && !string.IsNullOrEmpty(speakerName))
+        // 1. 如果这是玩家刚刚点击过的那句，就跳过，避免重复显示
+        if ((speakerName == playerName || speakerName == "Player") && suppressNextPlayerLine)
         {
-            nameText.text = speakerName;
+            suppressNextPlayerLine = false;
+            return;
         }
 
-        if (speakerName == "Player")
+        // 2. 玩家台词不在这里处理（玩家台词在点按钮时自己显示）
+        if (speakerName == playerName || speakerName == "Player")
         {
-            chatUIManager.AddRightMessage(lineText);
+            return;
         }
-        else
+
+        // 3. NPC 回复延迟显示在左边
+        StartCoroutine(ShowNpcReplyAfterDelay(speakerName, lineText));
+    }
+
+    private IEnumerator ShowNpcReplyAfterDelay(string speakerName, string lineText)
+    {
+        yield return new WaitForSeconds(npcReplyDelay);
+
+        if (chatUIManager != null)
         {
             chatUIManager.AddLeftMessage(speakerName, lineText);
         }
@@ -111,13 +152,19 @@ public class DialogueChatBridge : MonoBehaviour
 
         Response selectedResponse = currentResponses[index];
 
-        // 先把玩家点击的选项显示成右侧气泡
-        chatUIManager.AddRightMessage(selectedResponse.formattedText.text);
+        // 玩家点击后，立即在右边显示
+        if (chatUIManager != null)
+        {
+            chatUIManager.AddRightMessage(playerName, selectedResponse.formattedText.text);
+        }
 
-        // 隐藏按钮
+        // 隐藏当前选项
         HideChoiceButtons();
 
-        // 关键：通过当前 active conversation 的 ConversationView 继续对话
+        // 标记：接下来系统如果回调一次玩家行，不要再显示
+        suppressNextPlayerLine = true;
+
+        // 继续对话
         if (DialogueManager.instance != null &&
             DialogueManager.instance.activeConversations != null &&
             DialogueManager.instance.activeConversations.Count > 0)
@@ -144,19 +191,5 @@ public class DialogueChatBridge : MonoBehaviour
     {
         currentResponses = null;
         HideChoiceButtons();
-    }
-
-    private void HideDefaultDialogueUI()
-    {
-        GameObject defaultUI = GameObject.Find("Default Dialogue UI");
-        if (defaultUI != null)
-        {
-            defaultUI.SetActive(false);
-            Debug.Log("Default Dialogue UI 已关闭");
-        }
-        else
-        {
-            Debug.Log("没有找到 Default Dialogue UI");
-        }
     }
 }

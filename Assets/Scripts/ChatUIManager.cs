@@ -1,5 +1,5 @@
 using UnityEngine;
-using TMPro;
+using UnityEngine.UI;
 
 public class ChatUIManager : MonoBehaviour
 {
@@ -10,33 +10,50 @@ public class ChatUIManager : MonoBehaviour
     public GameObject leftBubblePrefab;
     public GameObject rightBubblePrefab;
 
+    [Header("滚动区域")]
+    public ScrollRect scrollRect;
+
     public void AddLeftMessage(string speakerName, string message)
     {
         GameObject bubble = Instantiate(leftBubblePrefab, contentRoot);
 
-        Transform nameText = bubble.transform.Find("BubbleBG/SpeakerNameText");
-        Transform messageText = bubble.transform.Find("BubbleBG/MessageText");
-
-        if (nameText != null)
+        LeftBubbleUI bubbleUI = bubble.GetComponent<LeftBubbleUI>();
+        if (bubbleUI != null)
         {
-            nameText.GetComponent<TextMeshProUGUI>().text = speakerName;
+            bubbleUI.SetData(speakerName, message);
+        }
+        else
+        {
+            Debug.LogError("LeftBubble prefab 上没有 LeftBubbleUI 组件！");
         }
 
-        if (messageText != null)
-        {
-            messageText.GetComponent<TextMeshProUGUI>().text = message;
-        }
+        Canvas.ForceUpdateCanvases();
+        ScrollToBottom();
     }
 
-    public void AddRightMessage(string message)
+    public void AddRightMessage(string speakerName, string message)
     {
         GameObject bubble = Instantiate(rightBubblePrefab, contentRoot);
 
-        Transform messageText = bubble.transform.Find("BubbleBG/MessageText");
-
-        if (messageText != null)
+        RightBubbleUI bubbleUI = bubble.GetComponent<RightBubbleUI>();
+        if (bubbleUI != null)
         {
-            messageText.GetComponent<TextMeshProUGUI>().text = message;
+            bubbleUI.SetData(speakerName, message);
+        }
+        else
+        {
+            Debug.LogError("RightBubble prefab 上没有 RightBubbleUI 组件！");
+        }
+
+        Canvas.ForceUpdateCanvases();
+        ScrollToBottom();
+    }
+
+    public void ScrollToBottom()
+    {
+        if (scrollRect != null)
+        {
+            scrollRect.verticalNormalizedPosition = 0f;
         }
     }
 }
