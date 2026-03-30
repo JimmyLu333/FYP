@@ -29,9 +29,18 @@ public class DialogueChatBridge : MonoBehaviour
 
     public void OpenChatAndStartConversation(string conversationTitle)
     {
+        Debug.Log("OpenChatAndStartConversation 被调用了");
+
+        HideDefaultDialogueUI();
+
         if (chatPanel != null)
         {
             chatPanel.SetActive(true);
+            Debug.Log("ChatPanel 已打开");
+        }
+        else
+        {
+            Debug.LogError("chatPanel 没有绑定！");
         }
 
         ClearOldChoices();
@@ -135,5 +144,19 @@ public class DialogueChatBridge : MonoBehaviour
     {
         currentResponses = null;
         HideChoiceButtons();
+    }
+
+    private void HideDefaultDialogueUI()
+    {
+        GameObject defaultUI = GameObject.Find("Default Dialogue UI");
+        if (defaultUI != null)
+        {
+            defaultUI.SetActive(false);
+            Debug.Log("Default Dialogue UI 已关闭");
+        }
+        else
+        {
+            Debug.Log("没有找到 Default Dialogue UI");
+        }
     }
 }
