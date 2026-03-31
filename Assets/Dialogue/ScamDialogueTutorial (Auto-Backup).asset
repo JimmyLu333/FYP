@@ -345,6 +345,10 @@ MonoBehaviour:
         value: 
         type: 0
         typeString: 
+      - title: Response Menu Sequence
+        value: 
+        type: 0
+        typeString: 
       conversationID: 1
       isRoot: 0
       isGroup: 0
@@ -366,7 +370,7 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 80.16815
+        x: 79.13722
         y: 349.62064
         width: 160
         height: 30
@@ -375,11 +379,11 @@ MonoBehaviour:
       - title: Title
         value: 
         type: 0
-        typeString: 
+        typeString: CustomFieldType_Text
       - title: Description
         value: 
         type: 0
-        typeString: 
+        typeString: CustomFieldType_Text
       - title: Actor
         value: 1
         type: 5
@@ -391,15 +395,15 @@ MonoBehaviour:
       - title: Menu Text
         value: 
         type: 0
-        typeString: 
+        typeString: CustomFieldType_Text
       - title: Dialogue Text
         value: "\u5305\u5403\u5305\u4F4F\uFF0C\u5E95\u85AA\u8FD8\u9AD8\uFF0C\u5C31\u662F\u8981\u51FA\u4E2A\u56FD\uFF0C\u4F60\u8981\u662F\u611F\u5174\u8DA3\u8205\u8205\u7ED9\u4F60\u4E70\u5F20\u673A\u7968\uFF0C\u987A\u4FBF\u5E26\u4F60\u73A9\u51E0\u5929"
         type: 0
-        typeString: 
+        typeString: CustomFieldType_Text
       - title: Sequence
         value: 
         type: 0
-        typeString: 
+        typeString: CustomFieldType_Text
       conversationID: 1
       isRoot: 0
       isGroup: 0
@@ -415,8 +419,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 198.9957
-        y: 466.8657
+        x: 195.90292
+        y: 468.92752
         width: 160
         height: 30
     - id: 6
@@ -475,8 +479,8 @@ MonoBehaviour:
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 44.755817, y: 7.3236737}
-    canvasZoom: 0.7900002
+    canvasScrollPosition: {x: 6.9475, y: 11.895813}
+    canvasZoom: 0.97
   - id: 2
     fields:
     - title: Title
