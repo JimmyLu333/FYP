@@ -4,6 +4,17 @@ using TMPro;
 using System.Collections;
 using PixelCrushers.DialogueSystem;
 
+
+[System.Serializable]
+public class ChoiceScoreRule
+{
+    [TextArea(2, 4)]
+    public string choiceText;
+
+    public int scoreGain;
+}
+
+
 public class DialogueChatBridge : MonoBehaviour
 {
     [Header("聊天UI")]
@@ -28,6 +39,17 @@ public class DialogueChatBridge : MonoBehaviour
     [Header("节奏设置")]
     public float npcReplyDelay = 1.2f;
 
+    [Header("诈骗成功率UI")]
+    public TextMeshProUGUI scamRateText;
+
+    [Header("诈骗成功率设置")]
+    public int currentScamRate = 0;
+    public int maxScamRate = 100;
+
+    [Header("选项加分规则")]
+    public ChoiceScoreRule[] choiceScoreRules;
+
+
     private Response[] currentResponses;
 
     // 防止玩家点击后，系统又重复生成一次玩家气泡
@@ -37,11 +59,13 @@ public class DialogueChatBridge : MonoBehaviour
     {
         HideChoiceButtons();
 
-        // 顶部固定显示聊天对象
         if (nameText != null)
         {
             nameText.text = npcName;
         }
+
+        currentScamRate = 0;
+        UpdateScamRateUI();
     }
 
     public void OpenChatAndStartConversation(string conversationTitle)
@@ -151,20 +175,30 @@ public class DialogueChatBridge : MonoBehaviour
         if (index < 0 || index >= currentResponses.Length) return;
 
         Response selectedResponse = currentResponses[index];
+        string selectedText = selectedResponse.formattedText.text;
 
-        // 玩家点击后，立即在右边显示
+        // 玩家（王从心）点击后，立即显示在右边
         if (chatUIManager != null)
         {
-            chatUIManager.AddRightMessage(playerName, selectedResponse.formattedText.text);
+            chatUIManager.AddRightMessage(playerName, selectedText);
         }
 
-        // 隐藏当前选项
+        // 根据选项内容加诈骗分数
+        int scoreGain = GetScoreGainForChoice(selectedText);
+        currentScamRate += scoreGain;
+
+        if (currentScamRate > maxScamRate)
+        {
+            currentScamRate = maxScamRate;
+        }
+
+        UpdateScamRateUI();
+
         HideChoiceButtons();
 
-        // 标记：接下来系统如果回调一次玩家行，不要再显示
+        // 防止系统再自动生成一次玩家台词
         suppressNextPlayerLine = true;
 
-        // 继续对话
         if (DialogueManager.instance != null &&
             DialogueManager.instance.activeConversations != null &&
             DialogueManager.instance.activeConversations.Count > 0)
@@ -192,4 +226,32 @@ public class DialogueChatBridge : MonoBehaviour
         currentResponses = null;
         HideChoiceButtons();
     }
+
+    private void UpdateScamRateUI()
+    {
+        if (scamRateText != null)
+        {
+            scamRateText.text = "诈骗成功率：" + currentScamRate + "%";
+        }
+    }
+
+    private int GetScoreGainForChoice(string selectedChoiceText)
+    {
+        if (choiceScoreRules == null || choiceScoreRules.Length == 0)
+        {
+            return 0;
+        }
+
+        for (int i = 0; i < choiceScoreRules.Length; i++)
+        {
+            if (choiceScoreRules[i] != null &&
+                choiceScoreRules[i].choiceText == selectedChoiceText)
+            {
+                return choiceScoreRules[i].scoreGain;
+            }
+        }
+
+        return 0;
+    }
+
 }
