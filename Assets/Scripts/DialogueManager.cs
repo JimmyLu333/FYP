@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using PixelCrushers.DialogueSystem; 
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 // 必须保留这个定义，否则会报 CS0246 错误
 [System.Serializable]
@@ -108,6 +109,11 @@ public class DialogueManager : MonoBehaviour
     public void EndDialogue()
     {
         if (dialoguePanel != null) dialoguePanel.SetActive(false);
-        if (characterIconsPanel != null) characterIconsPanel.SetActive(false); 
+        if (characterIconsPanel != null) characterIconsPanel.SetActive(false);
+
+        // 👉 对话结束后跳转场景
+        SceneManager.LoadScene("TutorialScene"); // 改成你的场景名
     }
+
+
 }
