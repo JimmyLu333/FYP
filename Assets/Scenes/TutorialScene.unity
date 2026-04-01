@@ -3128,8 +3128,20 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
+      propertyPath: conversationEvents.onConversationLine.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
+      propertyPath: conversationEvents.onConversationResponseMenu.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
       propertyPath: conversationEvents.onConversationEnd.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
+      propertyPath: conversationEvents.onConversationLine.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
       propertyPath: conversationEvents.onConversationEnd.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -3148,15 +3160,47 @@ PrefabInstance:
       value: LoadScene
       objectReference: {fileID: 0}
     - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
+      propertyPath: conversationEvents.onConversationLine.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
+      propertyPath: conversationEvents.onConversationLine.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnConversationLine
+      objectReference: {fileID: 0}
+    - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
       propertyPath: conversationEvents.onConversationResponseMenu.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 2129102360}
+    - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
+      propertyPath: conversationEvents.onConversationResponseMenu.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
+      propertyPath: conversationEvents.onConversationResponseMenu.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnConversationResponseMenu
+      objectReference: {fileID: 0}
     - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
       propertyPath: conversationEvents.onConversationEnd.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
       value: LoadVideoScene, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
+      propertyPath: conversationEvents.onConversationLine.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: DialogueChatBridge, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
+      propertyPath: conversationEvents.onConversationResponseMenu.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: DialogueChatBridge, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
       propertyPath: conversationEvents.onConversationEnd.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
+      propertyPath: conversationEvents.onConversationLine.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
+      propertyPath: conversationEvents.onConversationResponseMenu.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     m_RemovedComponents: []

@@ -55,6 +55,8 @@ public class DialogueChatBridge : MonoBehaviour
 
     private void Start()
     {
+        Debug.Log("DialogueChatBridge Start 运行了");
+
         HideChoiceButtons();
 
         if (nameText != null)
@@ -147,31 +149,48 @@ public class DialogueChatBridge : MonoBehaviour
 
     public void OnConversationResponseMenu(Response[] responses)
     {
+        Debug.Log("OnConversationResponseMenu 被触发了");
+
         currentResponses = responses;
 
         HideChoiceButtons();
 
-        if (responses == null || responses.Length == 0) return;
+        if (responses == null)
+        {
+            Debug.Log("responses 是 null");
+            return;
+        }
+
+        Debug.Log("responses 数量: " + responses.Length);
 
         if (responses.Length > 0)
         {
+            Debug.Log("设置 Choice1: " + responses[0].formattedText.text);
             SetupChoiceButton(choiceButton1, choiceButtonText1, responses[0], 0);
         }
 
         if (responses.Length > 1)
         {
+            Debug.Log("设置 Choice2: " + responses[1].formattedText.text);
             SetupChoiceButton(choiceButton2, choiceButtonText2, responses[1], 1);
         }
 
         if (responses.Length > 2)
         {
+            Debug.Log("设置 Choice3: " + responses[2].formattedText.text);
             SetupChoiceButton(choiceButton3, choiceButtonText3, responses[2], 2);
         }
     }
 
     private void SetupChoiceButton(Button button, TextMeshProUGUI buttonText, Response response, int index)
     {
-        if (button == null || buttonText == null || response == null) return;
+        if (button == null || buttonText == null || response == null)
+        {
+            Debug.LogWarning("SetupChoiceButton 失败：button / buttonText / response 有空值");
+            return;
+        }
+
+        Debug.Log("按钮激活: " + response.formattedText.text);
 
         button.gameObject.SetActive(true);
         buttonText.text = response.formattedText.text;
