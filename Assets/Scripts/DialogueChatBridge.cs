@@ -4,6 +4,14 @@ using TMPro;
 using System.Collections;
 using PixelCrushers.DialogueSystem;
 
+[System.Serializable]
+public class ChoiceScoreRule
+{
+    [TextArea(2, 4)]
+    public string choiceText;
+    public int scoreGain;
+}
+
 public class DialogueChatBridge : MonoBehaviour
 {
     [Header("聊天UI")]
@@ -25,23 +33,37 @@ public class DialogueChatBridge : MonoBehaviour
     public string playerName = "陈默";
     public string npcName = "王从心";
 
+    [Header("自动输出节点Actor")]
+    public string autoActorName = "PlayerAutoActor"; // 新建自动输出 Actor
+    public string displayNameForAutoActor = "王从心"; // 右边显示名字
+
     [Header("节奏设置")]
     public float npcReplyDelay = 1.2f;
 
-    private Response[] currentResponses;
+    [Header("诈骗成功率UI")]
+    public TextMeshProUGUI scamRateText;
 
-    // 防止玩家点击后，系统又重复生成一次玩家气泡
+    [Header("诈骗成功率设置")]
+    public int currentScamRate = 0;
+    public int maxScamRate = 100;
+
+    [Header("选项加分规则")]
+    public ChoiceScoreRule[] choiceScoreRules;
+
+    private Response[] currentResponses;
     private bool suppressNextPlayerLine = false;
 
     private void Start()
     {
         HideChoiceButtons();
 
-        // 顶部固定显示聊天对象
         if (nameText != null)
         {
             nameText.text = npcName;
         }
+
+        currentScamRate = 0;
+        UpdateScamRateUI();
     }
 
     public void OpenChatAndStartConversation(string conversationTitle)
@@ -83,21 +105,34 @@ public class DialogueChatBridge : MonoBehaviour
         string speakerName = subtitle.speakerInfo.Name;
         string lineText = subtitle.formattedText.text;
 
-        // 1. 如果这是玩家刚刚点击过的那句，就跳过，避免重复显示
+        // 跳过玩家已显示的台词
         if ((speakerName == playerName || speakerName == "Player") && suppressNextPlayerLine)
         {
             suppressNextPlayerLine = false;
             return;
         }
 
-        // 2. 玩家台词不在这里处理（玩家台词在点按钮时自己显示）
-        if (speakerName == playerName || speakerName == "Player")
+        // 玩家点击的台词在这里不处理
+        if (speakerName == playerName || speakerName == "Player") return;
+
+        // 自动输出节点（王从心自动台词）也显示在右边
+        if (speakerName == autoActorName)
         {
+            StartCoroutine(ShowRightAutoLine(lineText));
             return;
         }
 
-        // 3. NPC 回复延迟显示在左边
+        // NPC 回复延迟显示在左边
         StartCoroutine(ShowNpcReplyAfterDelay(speakerName, lineText));
+    }
+
+    private IEnumerator ShowRightAutoLine(string lineText)
+    {
+        yield return new WaitForSeconds(1.2f); // 延迟显示
+        if (chatUIManager != null)
+        {
+            chatUIManager.AddRightMessage(displayNameForAutoActor, lineText);
+        }
     }
 
     private IEnumerator ShowNpcReplyAfterDelay(string speakerName, string lineText)
@@ -151,20 +186,24 @@ public class DialogueChatBridge : MonoBehaviour
         if (index < 0 || index >= currentResponses.Length) return;
 
         Response selectedResponse = currentResponses[index];
+        string selectedText = selectedResponse.formattedText.text;
 
-        // 玩家点击后，立即在右边显示
+        // 玩家（王从心）点击后，显示在右边
         if (chatUIManager != null)
         {
-            chatUIManager.AddRightMessage(playerName, selectedResponse.formattedText.text);
+            chatUIManager.AddRightMessage(playerName, selectedText);
         }
 
-        // 隐藏当前选项
+        // 根据选项内容加减诈骗分数
+        int scoreGain = GetScoreGainForChoice(selectedText);
+        currentScamRate += scoreGain;
+        currentScamRate = Mathf.Clamp(currentScamRate, 0, maxScamRate);
+        UpdateScamRateUI();
+
         HideChoiceButtons();
 
-        // 标记：接下来系统如果回调一次玩家行，不要再显示
         suppressNextPlayerLine = true;
 
-        // 继续对话
         if (DialogueManager.instance != null &&
             DialogueManager.instance.activeConversations != null &&
             DialogueManager.instance.activeConversations.Count > 0)
@@ -191,5 +230,32 @@ public class DialogueChatBridge : MonoBehaviour
     {
         currentResponses = null;
         HideChoiceButtons();
+    }
+
+    private void UpdateScamRateUI()
+    {
+        if (scamRateText != null)
+        {
+            scamRateText.text = "诈骗成功率：" + currentScamRate + "%";
+        }
+    }
+
+    private int GetScoreGainForChoice(string selectedChoiceText)
+    {
+        if (choiceScoreRules == null || choiceScoreRules.Length == 0)
+        {
+            return 0;
+        }
+
+        for (int i = 0; i < choiceScoreRules.Length; i++)
+        {
+            if (choiceScoreRules[i] != null &&
+                choiceScoreRules[i].choiceText == selectedChoiceText)
+            {
+                return choiceScoreRules[i].scoreGain;
+            }
+        }
+
+        return 0;
     }
 }
