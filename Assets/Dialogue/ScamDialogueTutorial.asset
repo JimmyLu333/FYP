@@ -810,7 +810,7 @@ MonoBehaviour:
         type: 5
         typeString: CustomFieldType_Actor
       - title: Menu Text
-        value: "\u4F60\u662F\u4E0D\u662F\u4FE1\u4E0D\u8FC7\u8205\u8205\uFF1F\u6211\u8FD8\u80FD\u5BB3\u4F60\u4E0D\u6210\uFF1F"
+        value: "\u522B\u60F3\u90A3\u4E48\u591A\uFF0C\u5C31\u51FA\u6765\u73A9\u73A9"
         type: 0
         typeString: 
       - title: Dialogue Text
@@ -842,8 +842,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 504.27234
-        y: 575.34265
+        x: 365.70093
+        y: 528.19977
         width: 160
         height: 30
     - id: 14
@@ -865,7 +865,7 @@ MonoBehaviour:
         type: 5
         typeString: CustomFieldType_Actor
       - title: Menu Text
-        value: "\u522B\u60F3\u90A3\u4E48\u591A\uFF0C\u5C31\u51FA\u6765\u73A9\u73A9"
+        value: "\u4F60\u662F\u4E0D\u662F\u4FE1\u4E0D\u8FC7\u8205\u8205\uFF1F\u6211\u8FD8\u80FD\u5BB3\u4F60\u4E0D\u6210\uFF1F"
         type: 0
         typeString: 
       - title: Dialogue Text
@@ -897,8 +897,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 379.61493
-        y: 520.54816
+        x: 492.47202
+        y: 580.5481
         width: 160
         height: 30
     - id: 15
@@ -952,8 +952,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 623.4505
-        y: 519.17834
+        x: 626.3076
+        y: 527.74976
         width: 160
         height: 30
     - id: 16
@@ -2296,12 +2296,12 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 1217.4988
+        x: 1212.2229
         y: 872.44415
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 562.3574, y: 42.959705}
+    canvasScrollPosition: {x: 0, y: 0}
     canvasZoom: 0.5500004
   - id: 2
     fields:
