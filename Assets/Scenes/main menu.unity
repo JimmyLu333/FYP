@@ -6701,7 +6701,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1602925761}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 457900189}
+        m_TargetAssemblyTypeName: MenuManager, Assembly-CSharp
+        m_MethodName: StartGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1602925761
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8479,8 +8491,8 @@ Transform:
   m_LocalScale: {x: 1.6069747, y: 1.6069747, z: 1.6069747}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1618819503}
   - {fileID: 1602925759}
+  - {fileID: 1618819503}
   - {fileID: 1707940366}
   - {fileID: 1351217160}
   - {fileID: 2129816931}

@@ -1,22 +1,26 @@
 using UnityEngine;
+using UnityEngine.SceneManagement; // 👈 一定要加这个
 
 public class MenuManager : MonoBehaviour
 {
-    // 在 Inspector 里把这两个面板拖进去
     public GameObject mainMenuPanel;
     public GameObject optionsPanel;
 
-    // 点击 Options 按钮时调用
     public void OpenOptions()
     {
-        mainMenuPanel.SetActive(false); // 隐藏主菜单
-        optionsPanel.SetActive(true);    // 显示设置界面
+        mainMenuPanel.SetActive(false);
+        optionsPanel.SetActive(true);
     }
 
-    // 点击返回（Back）按钮时调用
     public void CloseOptions()
     {
-        mainMenuPanel.SetActive(true);  // 显示主菜单
-        optionsPanel.SetActive(false);  // 隐藏设置界面
+        mainMenuPanel.SetActive(true);
+        optionsPanel.SetActive(false);
+    }
+
+    // ✅ 新增：开始游戏
+    public void StartGame()
+    {
+        SceneManager.LoadScene("Beganing scenes"); // 👈 改成你的诈骗场景名字
     }
 }
