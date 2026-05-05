@@ -1815,9 +1815,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 701093000}
-        m_TargetAssemblyTypeName: StartDialogueOnClick, Assembly-CSharp
-        m_MethodName: StartChat
+      - m_Target: {fileID: 1325471086}
+        m_TargetAssemblyTypeName: PhoneDialSystem, Assembly-CSharp
+        m_MethodName: OpenPhoneInput
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1840,7 +1840,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dialogueChatBridge: {fileID: 2129102360}
-  conversationName: ScamChatExample
+  conversationName: ScamChatExample123
 --- !u!1 &781750584
 GameObject:
   m_ObjectHideFlags: 0
@@ -2640,51 +2640,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1079771924}
   m_CullTransparentMesh: 1
---- !u!1 &1104060532
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1104060534}
-  - component: {fileID: 1104060533}
-  m_Layer: 0
-  m_Name: VideoManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1104060533
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1104060532}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8912b0abe64e25f469222c7b366492e2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneName: BeginningCG
---- !u!4 &1104060534
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1104060532}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 69.098076, y: 385.71408, z: -11.059225}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1109807171
 GameObject:
   m_ObjectHideFlags: 0
@@ -3322,7 +3277,8 @@ MonoBehaviour:
   phoneInputField: {fileID: 1394436117}
   feedbackText: {fileID: 430880300}
   confirmButton: {fileID: 807309170}
-  correctPhoneNumber: 13228865437
+  chatIconButton: {fileID: 701092999}
+  correctPhoneNumber: 1
   dialogueChatBridge: {fileID: 2129102360}
   conversationName: Case01Chat
 --- !u!4 &1325471087
@@ -4219,7 +4175,7 @@ PrefabInstance:
     - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
       propertyPath: conversationEvents.onConversationEnd.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1104060533}
+      objectReference: {fileID: 0}
     - target: {fileID: 2945991373052804294, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
       propertyPath: conversationEvents.onConversationLine.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -5064,8 +5020,8 @@ MonoBehaviour:
   choiceButtonText1: {fileID: 985442677}
   choiceButtonText2: {fileID: 270634025}
   choiceButtonText3: {fileID: 1079771926}
-  playerName: "\u738B\u4ECE\u5FC3"
-  npcName: "\u9648\u9ED8"
+  playerName: "\u9648\u5927\u592B"
+  npcName: "\u5218\u798F\u6765"
   autoActorName: PlayerAutoActor
   displayNameForAutoActor: "\u738B\u4ECE\u5FC3"
   npcReplyDelay: 1.2
@@ -5263,7 +5219,6 @@ SceneRoots:
   - {fileID: 2033669422}
   - {fileID: 307818518}
   - {fileID: 192956906}
-  - {fileID: 1104060534}
   - {fileID: 1325471087}
   - {fileID: 1196809221}
   - {fileID: 2129102361}
