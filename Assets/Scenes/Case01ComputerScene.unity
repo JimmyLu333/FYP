@@ -5023,7 +5023,7 @@ MonoBehaviour:
   playerName: "\u9648\u5927\u592B"
   npcName: "\u5218\u798F\u6765"
   autoActorName: PlayerAutoActor
-  displayNameForAutoActor: "\u738B\u4ECE\u5FC3"
+  displayNameForAutoActor: "\u9648\u5927\u592B"
   npcReplyDelay: 1.2
   scamRateText: {fileID: 584255067}
   currentScamRate: 0

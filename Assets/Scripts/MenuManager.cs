@@ -19,7 +19,6 @@ public class MenuManager : MonoBehaviour
         optionsPanel.SetActive(false);
     }
 
-    // ✅ 开始游戏（修复 Dialogue System 残留问题）
     public void StartGame()
     {
         var oldManagers = FindObjectsOfType<DialogueSystemController>();
