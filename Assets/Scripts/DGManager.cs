@@ -16,9 +16,9 @@ public class DialogueView
     }
 }
 
-public class DialogueManager : MonoBehaviour
+public class DGManager : MonoBehaviour
 {
-    public static DialogueManager instance;
+    public static DGManager instance;
 
     [System.Serializable]
     public struct DialogueLine
