@@ -23,4 +23,11 @@ public class MenuManager : MonoBehaviour
     {
         SceneManager.LoadScene("Beganing scenes"); // 👈 改成你的诈骗场景名字
     }
+
+    public void ExitGame()
+    {
+        Debug.Log("退出游戏"); // 在Editor里看效果
+
+        Application.Quit(); // 真正退出
+    }
 }
