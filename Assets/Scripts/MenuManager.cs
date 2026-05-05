@@ -1,5 +1,6 @@
 using UnityEngine;
-using UnityEngine.SceneManagement; // 👈 一定要加这个
+using UnityEngine.SceneManagement;
+using PixelCrushers.DialogueSystem;
 
 public class MenuManager : MonoBehaviour
 {
@@ -18,16 +19,22 @@ public class MenuManager : MonoBehaviour
         optionsPanel.SetActive(false);
     }
 
-    // ✅ 新增：开始游戏
+    // ✅ 开始游戏（修复 Dialogue System 残留问题）
     public void StartGame()
     {
-        SceneManager.LoadScene("Beganing scenes"); // 👈 改成你的诈骗场景名字
+        var oldManagers = FindObjectsOfType<DialogueSystemController>();
+
+        foreach (var manager in oldManagers)
+        {
+            Destroy(manager.gameObject);
+        }
+
+        SceneManager.LoadScene("Beganing scenes");
     }
 
     public void ExitGame()
     {
-        Debug.Log("退出游戏"); // 在Editor里看效果
-
-        Application.Quit(); // 真正退出
+        Debug.Log("退出游戏");
+        Application.Quit();
     }
 }
