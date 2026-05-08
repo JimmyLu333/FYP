@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using TMPro;
+using System.Collections;
 
 public class UIMazeController : MonoBehaviour
 {
@@ -21,13 +22,20 @@ public class UIMazeController : MonoBehaviour
     public float timeLimit = 60f;
     public float goalDistance = 35f;
 
+    [Header("成功后设置")]
+    public float closeDelayAfterSuccess = 3f;
+
     [Header("碰撞设置")]
     [Range(0.1f, 1f)]
     public float ballCollisionScale = 0.6f;
 
+    [Header("聊天系统")]
+    public DialogueChatBridge dialogueChatBridge;
+
     private float currentTime;
     private bool isPlaying;
     private Vector2 ballStartPos;
+    private Coroutine closeCoroutine;
 
     void Start()
     {
@@ -51,6 +59,12 @@ public class UIMazeController : MonoBehaviour
 
     public void StartMaze()
     {
+        if (closeCoroutine != null)
+        {
+            StopCoroutine(closeCoroutine);
+            closeCoroutine = null;
+        }
+
         if (mazeWindowPanel != null)
             mazeWindowPanel.SetActive(true);
 
@@ -82,9 +96,7 @@ public class UIMazeController : MonoBehaviour
         ball.anchoredPosition = newPos;
 
         if (IsBallCollidingWithWall())
-        {
             ball.anchoredPosition = oldPos;
-        }
     }
 
     bool IsBallCollidingWithWall()
@@ -98,9 +110,7 @@ public class UIMazeController : MonoBehaviour
             Rect wallRect = GetRect(wall);
 
             if (ballRect.Overlaps(wallRect))
-            {
                 return true;
-            }
         }
 
         return false;
@@ -160,9 +170,7 @@ public class UIMazeController : MonoBehaviour
         float distance = Vector2.Distance(ball.anchoredPosition, goal.anchoredPosition);
 
         if (distance <= goalDistance)
-        {
             SuccessMaze();
-        }
     }
 
     void SuccessMaze()
@@ -173,6 +181,19 @@ public class UIMazeController : MonoBehaviour
 
         if (resultText != null)
             resultText.text = "破解成功！到账 ¥50,000";
+
+        closeCoroutine = StartCoroutine(CloseAfterSuccess());
+    }
+
+    IEnumerator CloseAfterSuccess()
+    {
+        yield return new WaitForSeconds(closeDelayAfterSuccess);
+
+        if (mazeWindowPanel != null)
+            mazeWindowPanel.SetActive(false);
+
+        if (dialogueChatBridge != null)
+            dialogueChatBridge.ContinueAfterMaze();
     }
 
     void FailMaze()

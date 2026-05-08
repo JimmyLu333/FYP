@@ -82,15 +82,10 @@ public class VerificationCodeSystem : MonoBehaviour
             if (codeAppButton != null)
                 codeAppButton.interactable = false;
 
-            // ✅ 验证码正确后启动迷宫
             if (uiMazeController != null)
-            {
                 uiMazeController.StartMaze();
-            }
             else
-            {
                 Debug.LogError("UIMazeController 没有绑定！");
-            }
         }
         else
         {
