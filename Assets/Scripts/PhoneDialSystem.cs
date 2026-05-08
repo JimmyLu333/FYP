@@ -4,14 +4,11 @@ using TMPro;
 
 public class PhoneDialSystem : MonoBehaviour
 {
-    [Header("电话输入 UI ")]
+    [Header("电话输入 UI")]
     public GameObject phoneInputPanel;
     public TMP_InputField phoneInputField;
     public TextMeshProUGUI feedbackText;
     public Button confirmButton;
-
-    [Header("聊天图标")]
-    public Button chatIconButton; // 👈 新增：聊天按钮
 
     [Header("正确电话")]
     public string correctPhoneNumber = "13228865437";
@@ -23,6 +20,8 @@ public class PhoneDialSystem : MonoBehaviour
     [Header("退出按钮")]
     public Button closeButton;
 
+    private bool phoneVerified = false;
+
     void Start()
     {
         if (phoneInputPanel != null)
@@ -33,15 +32,20 @@ public class PhoneDialSystem : MonoBehaviour
 
         if (confirmButton != null)
             confirmButton.onClick.AddListener(CheckPhoneNumber);
+
         if (closeButton != null)
             closeButton.onClick.AddListener(ClosePhoneInput);
     }
 
     public void OpenPhoneInput()
     {
-        // 👇 如果已经禁用了，就不再打开
-        if (chatIconButton != null && !chatIconButton.interactable)
+        if (phoneVerified)
+        {
+            if (dialogueChatBridge != null && dialogueChatBridge.chatPanel != null)
+                dialogueChatBridge.chatPanel.SetActive(true);
+
             return;
+        }
 
         if (phoneInputPanel != null)
             phoneInputPanel.SetActive(true);
@@ -61,12 +65,10 @@ public class PhoneDialSystem : MonoBehaviour
 
         if (input == correctPhoneNumber)
         {
+            phoneVerified = true;
+
             if (phoneInputPanel != null)
                 phoneInputPanel.SetActive(false);
-
-            // ✅ 禁用聊天按钮（关键）
-            if (chatIconButton != null)
-                chatIconButton.interactable = false;
 
             if (dialogueChatBridge != null)
                 dialogueChatBridge.OpenChatAndStartConversation(conversationName);
@@ -87,5 +89,11 @@ public class PhoneDialSystem : MonoBehaviour
     {
         if (phoneInputPanel != null)
             phoneInputPanel.SetActive(false);
+
+        if (phoneInputField != null)
+            phoneInputField.text = "";
+
+        if (feedbackText != null)
+            feedbackText.text = "";
     }
 }
