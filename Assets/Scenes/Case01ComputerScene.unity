@@ -6611,7 +6611,9 @@ MonoBehaviour:
   moveSpeed: 250
   timeLimit: 60
   goalDistance: 35
+  closeDelayAfterSuccess: 3
   ballCollisionScale: 0.4
+  dialogueChatBridge: {fileID: 2129102360}
 --- !u!4 &1680596365
 Transform:
   m_ObjectHideFlags: 0
@@ -8511,6 +8513,10 @@ MonoBehaviour:
     scoreGain: -10
   - choiceText: "\u5BF9\uFF0C\u4F60\u51FA\u6765\u5C31\u80FD\u770B\u5230\u6211\u3002\u6211\u4E3E\u4E2A\u724C\u5B50\u7B49\u4F60\uFF0C\u4E0A\u9762\u5199\u4F60\u540D\u5B57\uFF0C\u591F\u9686\u91CD\u5427\uFF1F\u522B\u5230\u65F6\u5019\u8BA4\u4E0D\u51FA\u8205\u8205\u4E86\u3002"
     scoreGain: 5
+  wordStops:
+  - triggerText: "\u6551\u4EBA\u8981\u7D27\u554A\uFF01\u6211\u73B0\u5728\u5C31\u6765\u533B\u9662"
+    pauseForMaze: 1
+  waitingForMaze: 0
 --- !u!4 &2129102361
 Transform:
   m_ObjectHideFlags: 0

@@ -12,6 +12,14 @@ public class ChoiceScoreRule
     public int scoreGain;
 }
 
+[System.Serializable]
+public class WordStop
+{
+    [TextArea(2, 4)]
+    public string triggerText;
+    public bool pauseForMaze = true;
+}
+
 public class DialogueChatBridge : MonoBehaviour
 {
     [Header("聊天UI")]
@@ -30,12 +38,12 @@ public class DialogueChatBridge : MonoBehaviour
     public TextMeshProUGUI choiceButtonText3;
 
     [Header("角色名")]
-    public string playerName = "陈默";
-    public string npcName = "王从心";
+    public string playerName = "陈大夫";
+    public string npcName = "刘福来";
 
     [Header("自动输出节点Actor")]
-    public string autoActorName = "PlayerAutoActor"; // 新建自动输出 Actor
-    public string displayNameForAutoActor = "王从心"; // 右边显示名字
+    public string autoActorName = "PlayerAutoActor";
+    public string displayNameForAutoActor = "陈大夫";
 
     [Header("节奏设置")]
     public float npcReplyDelay = 1.2f;
@@ -50,19 +58,22 @@ public class DialogueChatBridge : MonoBehaviour
     [Header("选项加分规则")]
     public ChoiceScoreRule[] choiceScoreRules;
 
+    [Header("暂停触发列表")]
+    public WordStop[] wordStops;
+
+    [Header("迷宫等待")]
+    public bool waitingForMaze = false;
+
     private Response[] currentResponses;
+    private Response[] pendingResponses;
     private bool suppressNextPlayerLine = false;
 
     private void Start()
     {
-        Debug.Log("DialogueChatBridge Start 运行了");
-
         HideChoiceButtons();
 
         if (nameText != null)
-        {
             nameText.text = npcName;
-        }
 
         currentScamRate = 0;
         UpdateScamRateUI();
@@ -73,20 +84,12 @@ public class DialogueChatBridge : MonoBehaviour
         HideDefaultDialogueUI();
 
         if (chatPanel != null)
-        {
             chatPanel.SetActive(true);
-        }
-        else
-        {
-            Debug.LogError("chatPanel 没有绑定！");
-        }
 
         ClearOldChoices();
 
         if (nameText != null)
-        {
             nameText.text = npcName;
-        }
 
         DialogueManager.StartConversation(conversationTitle);
     }
@@ -95,9 +98,7 @@ public class DialogueChatBridge : MonoBehaviour
     {
         GameObject defaultUI = GameObject.Find("Default Dialogue UI");
         if (defaultUI != null)
-        {
             defaultUI.SetActive(false);
-        }
     }
 
     public void OnConversationLine(Subtitle subtitle)
@@ -107,34 +108,54 @@ public class DialogueChatBridge : MonoBehaviour
         string speakerName = subtitle.speakerInfo.Name;
         string lineText = subtitle.formattedText.text;
 
-        // 跳过玩家已显示的台词
+        CheckWordStop(lineText);
+
         if ((speakerName == playerName || speakerName == "Player") && suppressNextPlayerLine)
         {
             suppressNextPlayerLine = false;
             return;
         }
 
-        // 玩家点击的台词在这里不处理
-        if (speakerName == playerName || speakerName == "Player") return;
+        if (speakerName == playerName || speakerName == "Player")
+            return;
 
-        // 自动输出节点（王从心自动台词）也显示在右边
         if (speakerName == autoActorName)
         {
             StartCoroutine(ShowRightAutoLine(lineText));
             return;
         }
 
-        // NPC 回复延迟显示在左边
         StartCoroutine(ShowNpcReplyAfterDelay(speakerName, lineText));
+    }
+
+    private void CheckWordStop(string lineText)
+    {
+        if (wordStops == null) return;
+
+        foreach (WordStop ws in wordStops)
+        {
+            if (ws == null || string.IsNullOrEmpty(ws.triggerText)) continue;
+
+            if (lineText.Contains(ws.triggerText))
+            {
+                if (ws.pauseForMaze)
+                {
+                    waitingForMaze = true;
+                    HideChoiceButtons();
+                    Debug.Log("触发迷宫暂停：" + ws.triggerText);
+                }
+
+                return;
+            }
+        }
     }
 
     private IEnumerator ShowRightAutoLine(string lineText)
     {
-        yield return new WaitForSeconds(1.2f); // 延迟显示
+        yield return new WaitForSeconds(1.2f);
+
         if (chatUIManager != null)
-        {
             chatUIManager.AddRightMessage(displayNameForAutoActor, lineText);
-        }
     }
 
     private IEnumerator ShowNpcReplyAfterDelay(string speakerName, string lineText)
@@ -142,55 +163,60 @@ public class DialogueChatBridge : MonoBehaviour
         yield return new WaitForSeconds(npcReplyDelay);
 
         if (chatUIManager != null)
-        {
             chatUIManager.AddLeftMessage(speakerName, lineText);
-        }
     }
 
     public void OnConversationResponseMenu(Response[] responses)
     {
-        Debug.Log("OnConversationResponseMenu 被触发了");
-
         currentResponses = responses;
-
         HideChoiceButtons();
 
-        if (responses == null)
+        if (responses == null || responses.Length == 0)
+            return;
+
+        if (waitingForMaze)
         {
-            Debug.Log("responses 是 null");
+            pendingResponses = responses;
+            Debug.Log("正在等待迷宫完成，选项已暂存。");
             return;
         }
 
-        Debug.Log("responses 数量: " + responses.Length);
+        ShowResponses(responses);
+    }
+
+    private void ShowResponses(Response[] responses)
+    {
+        HideChoiceButtons();
+
+        if (responses == null || responses.Length == 0)
+            return;
 
         if (responses.Length > 0)
-        {
-            Debug.Log("设置 Choice1: " + responses[0].formattedText.text);
             SetupChoiceButton(choiceButton1, choiceButtonText1, responses[0], 0);
-        }
 
         if (responses.Length > 1)
-        {
-            Debug.Log("设置 Choice2: " + responses[1].formattedText.text);
             SetupChoiceButton(choiceButton2, choiceButtonText2, responses[1], 1);
-        }
 
         if (responses.Length > 2)
-        {
-            Debug.Log("设置 Choice3: " + responses[2].formattedText.text);
             SetupChoiceButton(choiceButton3, choiceButtonText3, responses[2], 2);
+    }
+
+    public void ContinueAfterMaze()
+    {
+        waitingForMaze = false;
+
+        if (pendingResponses != null && pendingResponses.Length > 0)
+        {
+            currentResponses = pendingResponses;
+            ShowResponses(pendingResponses);
+            pendingResponses = null;
         }
     }
 
     private void SetupChoiceButton(Button button, TextMeshProUGUI buttonText, Response response, int index)
     {
         if (button == null || buttonText == null || response == null)
-        {
-            Debug.LogWarning("SetupChoiceButton 失败：button / buttonText / response 有空值");
             return;
-        }
-
-        Debug.Log("按钮激活: " + response.formattedText.text);
 
         button.gameObject.SetActive(true);
         buttonText.text = response.formattedText.text;
@@ -207,20 +233,15 @@ public class DialogueChatBridge : MonoBehaviour
         Response selectedResponse = currentResponses[index];
         string selectedText = selectedResponse.formattedText.text;
 
-        // 玩家（王从心）点击后，显示在右边
         if (chatUIManager != null)
-        {
             chatUIManager.AddRightMessage(playerName, selectedText);
-        }
 
-        // 根据选项内容加减诈骗分数
         int scoreGain = GetScoreGainForChoice(selectedText);
         currentScamRate += scoreGain;
         currentScamRate = Mathf.Clamp(currentScamRate, 0, maxScamRate);
         UpdateScamRateUI();
 
         HideChoiceButtons();
-
         suppressNextPlayerLine = true;
 
         if (DialogueManager.instance != null &&
@@ -231,10 +252,6 @@ public class DialogueChatBridge : MonoBehaviour
             activeConversation.conversationView.SelectResponse(
                 new SelectedResponseEventArgs(selectedResponse)
             );
-        }
-        else
-        {
-            Debug.LogWarning("没有找到 active conversation，无法继续对话。");
         }
     }
 
@@ -248,31 +265,24 @@ public class DialogueChatBridge : MonoBehaviour
     private void ClearOldChoices()
     {
         currentResponses = null;
+        pendingResponses = null;
         HideChoiceButtons();
     }
 
     private void UpdateScamRateUI()
     {
         if (scamRateText != null)
-        {
             scamRateText.text = "诈骗成功率：" + currentScamRate + "%";
-        }
     }
 
     private int GetScoreGainForChoice(string selectedChoiceText)
     {
-        if (choiceScoreRules == null || choiceScoreRules.Length == 0)
-        {
-            return 0;
-        }
+        if (choiceScoreRules == null) return 0;
 
-        for (int i = 0; i < choiceScoreRules.Length; i++)
+        foreach (ChoiceScoreRule rule in choiceScoreRules)
         {
-            if (choiceScoreRules[i] != null &&
-                choiceScoreRules[i].choiceText == selectedChoiceText)
-            {
-                return choiceScoreRules[i].scoreGain;
-            }
+            if (rule != null && rule.choiceText == selectedChoiceText)
+                return rule.scoreGain;
         }
 
         return 0;
