@@ -20,6 +20,9 @@ public class PhoneDialSystem : MonoBehaviour
     public DialogueChatBridge dialogueChatBridge;
     public string conversationName = "Case01Chat";
 
+    [Header("退出按钮")]
+    public Button closeButton;
+
     void Start()
     {
         if (phoneInputPanel != null)
@@ -30,6 +33,8 @@ public class PhoneDialSystem : MonoBehaviour
 
         if (confirmButton != null)
             confirmButton.onClick.AddListener(CheckPhoneNumber);
+        if (closeButton != null)
+            closeButton.onClick.AddListener(ClosePhoneInput);
     }
 
     public void OpenPhoneInput()
@@ -76,5 +81,11 @@ public class PhoneDialSystem : MonoBehaviour
                 feedbackText.color = Color.red;
             }
         }
+    }
+
+    public void ClosePhoneInput()
+    {
+        if (phoneInputPanel != null)
+            phoneInputPanel.SetActive(false);
     }
 }
