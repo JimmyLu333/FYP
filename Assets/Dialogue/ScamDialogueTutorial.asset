@@ -3830,7 +3830,7 @@ MonoBehaviour:
         type: 5
         typeString: CustomFieldType_Actor
       - title: Menu Text
-        value: "\u60A8\u5982\u679C\u544A\u8BC9\u6D69\u6D69\u7684\u7236\u6BCD\u4E5F\u6CA1\u7528\u5440\uFF0C\u4ED6\u4EEC\u6765\u4E86\u4E5F\u5E2E\u4E0D\u4E0A\u5FD9\uFF0C\u53EA\u4F1A\u54ED\u54ED\u557C\u557C\u5F71\u54CD\u62A2\u6551\u3002\u7B49\u624B\u672F\u6210\u529F\u518D\u8BF4\u4E0D\u884C\u5417\uFF1F"
+        value: "\u9996\u5148\uFF0C\u5982\u679C\u60A8\u544A\u8BC9\u4E86\u6D69\u6D69\u7684\u7236\u6BCD\uFF0C\u4ED6\u4EEC\u53EA\u4F1A\u54ED\u54ED\u557C\u557C\u5F71\u54CD\u62A2\u6551\u3002"
         type: 0
         typeString: 
       - title: Dialogue Text
@@ -3885,7 +3885,7 @@ MonoBehaviour:
         type: 5
         typeString: CustomFieldType_Actor
       - title: Menu Text
-        value: "\u8FD9\u4EF6\u4E8B\u4E0D\u80FD\u548C\u60A8\u7684\u4EB2\u4EBA\u4EEC\u8BF4\u3002\u738B\u7237\u7237\uFF0C\u60A8\u544A\u8BC9\u4ED6\u4EEC\uFF0C\u4ED6\u4EEC\u9664\u4E86\u54ED\u548C\u614C\uFF0C\u80FD\u505A\u4EC0\u4E48\uFF1F\u7B49\u624B\u672F\u505A\u5B8C\u518D\u901A\u77E5\uFF0C\u624D\u662F\u4E3A\u4ED6\u4EEC\u597D\u3002"
+        value: "\u9996\u5148\uFF0C\u8FD9\u4EF6\u4E8B\u4E0D\u80FD\u548C\u60A8\u7684\u4EB2\u4EBA\u4EEC\u8BF4\u3002\u738B\u7237\u7237\uFF0C\u60A8\u544A\u8BC9\u4ED6\u4EEC\uFF0C\u4ED6\u4EEC\u9664\u4E86\u54ED\u548C\u614C\uFF0C\u80FD\u505A\u4EC0\u4E48\uFF1F\u7B49\u624B\u672F\u505A\u5B8C\u518D\u901A\u77E5\uFF0C\u624D\u662F\u4E3A\u4ED6\u4EEC\u597D\u3002"
         type: 0
         typeString: 
       - title: Dialogue Text
@@ -3940,7 +3940,7 @@ MonoBehaviour:
         type: 5
         typeString: CustomFieldType_Actor
       - title: Menu Text
-        value: "\u4E0D\u8BB8\u544A\u8BC9\u4F60\u513F\u5B50\uFF01\u8BF4\u4E86\u8FD9\u4E8B\u513F\u5C31\u9EC4\u4E86\u3002\u4F60\u81EA\u5DF1\u62FF\u94B1\u505A\u4E3B\u5C31\u884C\u3002"
+        value: "\u7B2C\u4E00\uFF01\u4E0D\u8BB8\u544A\u8BC9\u4F60\u513F\u5B50\uFF01\u8BF4\u4E86\u8FD9\u4E8B\u513F\u5C31\u9EC4\u4E86\u3002\u4F60\u81EA\u5DF1\u62FF\u94B1\u505A\u4E3B\u5C31\u884C\u3002"
         type: 0
         typeString: 
       - title: Dialogue Text
@@ -4227,7 +4227,7 @@ MonoBehaviour:
         type: 5
         typeString: CustomFieldType_Actor
       - title: Menu Text
-        value: "\u8B66\u5BDF\u6765\u4E86\u8981\u8C03\u67E5\u597D\u51E0\u5929\uFF0C\u624B\u672F\u5361\u4F4F\u505A\u4E0D\u4E86\u3002\u60A8\u4E0D\u60F3\u8FD9\u6837\u5427\uFF1F"
+        value: "\u8B66\u5BDF\u6765\u4E86\u5C31\u8981\u8C03\u67E5\u597D\u51E0\u5929\uFF0C\u624B\u672F\u5361\u4F4F\u505A\u4E0D\u4E86\u3002\u60A8\u4E5F\u4E0D\u60F3\u8FD9\u6837\u5427\uFF1F"
         type: 0
         typeString: 
       - title: Dialogue Text
@@ -4259,8 +4259,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 1259.3429
-        y: 695.26373
+        x: 1256.7113
+        y: 696.5795
         width: 160
         height: 30
     - id: 35
@@ -4349,7 +4349,7 @@ MonoBehaviour:
         type: 5
         typeString: CustomFieldType_Actor
       - title: Menu Text
-        value: "\u5230\u4E86\u94F6\u884C\uFF0C\u67DC\u5458\u95EE\u60A8\uFF0C\u5C31\u8BF4\u7ED9\u5916\u5B59\u4E70\u623F\u4EA4\u5B9A\u91D1\u3002\u5343\u4E07\u522B\u63D0\u533B\u9662\u3001\u62A2\u6551\u2014\u2014\u94F6\u884C\u4E00\u542C\u8FD9\u4E9B\u5C31\u8981\u62A5\u8B66\u6838\u5B9E\uFF0C\u8D70\u6D41\u7A0B\u4E24\u4E09\u4E2A\u5C0F\u65F6\u3002\u60A8\u5B59\u5B50\u7B49\u4E0D\u8D77\u3002"
+        value: "\u5230\u4E86\u94F6\u884C\uFF0C\u67DC\u5458\u95EE\u60A8\uFF0C\u5C31\u8BF4\u7ED9\u5916\u5B59\u4E70\u623F\u4EA4\u5B9A\u91D1\u3002\u5343\u4E07\u522B\u63D0\u533B\u9662\u3001\u62A2\u6551\u3002\u94F6\u884C\u4E00\u542C\u8FD9\u4E9B\u5C31\u8981\u62A5\u8B66\u6838\u5B9E\uFF0C\u8D70\u6D41\u7A0B\u4E24\u4E09\u4E2A\u5C0F\u65F6\u3002\u60A8\u5B59\u5B50\u7B49\u4E0D\u8D77\u3002"
         type: 0
         typeString: 
       - title: Dialogue Text
@@ -4679,7 +4679,7 @@ MonoBehaviour:
         type: 5
         typeString: CustomFieldType_Actor
       - title: Menu Text
-        value: "\u6211\u6700\u591A\u518D\u7ED9\u60A8\u538B25\u5206\u949F\u300225\u5206\u949F\u5185\u94B1\u4E0D\u5230\u8D26\uFF0C\u624B\u672F\u5BA4\u5C31\u4F1A\u628A\u540D\u989D\u8BA9\u7ED9\u540E\u9762\u7684\u6025\u8BCA\u60A3\u8005\u3002\u5230\u90A3\u65F6\u5019\uFF0C\u5C31\u7B97\u60A8\u62FF\u4E00\u5343\u4E07\u6765\uFF0C\u4E5F\u6CA1\u4EBA\u6562\u4E0A\u624B\u672F\u53F0\u4E86\u3002\r\u60A8\u73B0\u5728\u6BCF\u4E00\u79D2\u949F\u7684\u72B9\u8C6B\uFF0C\u90FD\u5728\u8BA9\u4ED6\u7684\u5927\u8111\u591A\u6B7B\u4E00\u7247\u7EC6\u80DE\u3002"
+        value: "\u6211\u6700\u591A\u518D\u7ED9\u60A8\u538B25\u5206\u949F\u300225\u5206\u949F\u5185\u94B1\u4E0D\u5230\u8D26\uFF0C\u624B\u672F\u5BA4\u5C31\u4F1A\u628A\u540D\u989D\u8BA9\u7ED9\u540E\u9762\u7684\u6025\u8BCA\u60A3\u8005\u3002"
         type: 0
         typeString: 
       - title: Dialogue Text
@@ -4701,7 +4701,7 @@ MonoBehaviour:
       - originConversationID: 2
         originDialogueID: 42
         destinationConversationID: 2
-        destinationDialogueID: 43
+        destinationDialogueID: 53
         isConnector: 0
         priority: 2
       conditionsString: 
@@ -4766,8 +4766,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 1556.7354
-        y: 544.01373
+        x: 1580.4465
+        y: 606.9004
         width: 160
         height: 30
     - id: 44
@@ -4821,8 +4821,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 1552.6982
-        y: 631.47394
+        x: 1574.3479
+        y: 683.0203
         width: 160
         height: 30
     - id: 45
@@ -4876,8 +4876,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 1555.977
-        y: 725.7362
+        x: 1554.9462
+        y: 761.8187
         width: 160
         height: 30
     - id: 46
@@ -4976,12 +4976,6 @@ MonoBehaviour:
       - originConversationID: 2
         originDialogueID: 47
         destinationConversationID: 2
-        destinationDialogueID: 48
-        isConnector: 0
-        priority: 2
-      - originConversationID: 2
-        originDialogueID: 47
-        destinationConversationID: 2
         destinationDialogueID: 49
         isConnector: 0
         priority: 2
@@ -4992,57 +4986,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 1560.6667
-        y: 925.1035
-        width: 160
-        height: 30
-    - id: 48
-      fields:
-      - title: Title
-        value: 
-        type: 0
-        typeString: 
-      - title: Description
-        value: 
-        type: 0
-        typeString: 
-      - title: Actor
-        value: 5
-        type: 5
-        typeString: CustomFieldType_Actor
-      - title: Conversant
-        value: 4
-        type: 5
-        typeString: CustomFieldType_Actor
-      - title: Menu Text
-        value: 
-        type: 0
-        typeString: 
-      - title: Dialogue Text
-        value: "\u4E00\u5B9A\u8981\u6551\u6D3B\u6211\u5927\u5B59\u5B50\u554A\u5927\u592B\u6C42\u6C42\u4F60\u4E86\uFF01"
-        type: 0
-        typeString: 
-      - title: Sequence
-        value: 
-        type: 0
-        typeString: 
-      conversationID: 2
-      isRoot: 0
-      isGroup: 0
-      nodeColor: 
-      delaySimStatus: 0
-      falseConditionAction: Block
-      conditionPriority: 2
-      outgoingLinks: []
-      conditionsString: 
-      userScript: 
-      onExecute:
-        m_PersistentCalls:
-          m_Calls: []
-      canvasRect:
-        serializedVersion: 2
-        x: 1881.2605
-        y: 107.04208
+        x: 1558.725
+        y: 928.0161
         width: 160
         height: 30
     - id: 49
@@ -5097,7 +5042,7 @@ MonoBehaviour:
       canvasRect:
         serializedVersion: 2
         x: 1561.9326
-        y: 1029.5339
+        y: 1095.5532
         width: 160
         height: 30
     - id: 50
@@ -5151,8 +5096,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 1556.8693
-        y: 1113.7112
+        x: 1560.7527
+        y: 1199.148
         width: 160
         height: 30
     - id: 51
@@ -5206,8 +5151,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 1556.8693
-        y: 1230.7998
+        x: 1555.8984
+        y: 1269.6348
         width: 160
         height: 30
     - id: 52
@@ -5259,9 +5204,64 @@ MonoBehaviour:
         y: 1367.1012
         width: 160
         height: 30
+    - id: 53
+      fields:
+      - title: Title
+        value: 
+        type: 0
+        typeString: 
+      - title: Description
+        value: 
+        type: 0
+        typeString: 
+      - title: Actor
+        value: 3
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Conversant
+        value: 5
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Menu Text
+        value: 
+        type: 0
+        typeString: 
+      - title: Dialogue Text
+        value: "\u5230\u90A3\u65F6\u5019\uFF0C\u5C31\u7B97\u60A8\u62FF\u4E00\u5343\u4E07\u6765\uFF0C\u4E5F\u6CA1\u4EBA\u6562\u4E0A\u624B\u672F\u53F0\u4E86\u3002\r\u60A8\u73B0\u5728\u6BCF\u4E00\u79D2\u949F\u7684\u72B9\u8C6B\uFF0C\u90FD\u5728\u8BA9\u4ED6\u7684\u5927\u8111\u591A\u6B7B\u4E00\u7247\u7EC6\u80DE\u3002"
+        type: 0
+        typeString: 
+      - title: Sequence
+        value: 
+        type: 0
+        typeString: 
+      conversationID: 2
+      isRoot: 0
+      isGroup: 0
+      nodeColor: 
+      delaySimStatus: 0
+      falseConditionAction: Block
+      conditionPriority: 2
+      outgoingLinks:
+      - originConversationID: 2
+        originDialogueID: 53
+        destinationConversationID: 2
+        destinationDialogueID: 43
+        isConnector: 0
+        priority: 2
+      conditionsString: 
+      userScript: 
+      onExecute:
+        m_PersistentCalls:
+          m_Calls: []
+      canvasRect:
+        serializedVersion: 2
+        x: 1560.8591
+        y: 527.5096
+        width: 160
+        height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 1408.7692, y: 1045.3684}
-    canvasZoom: 0.73000026
+    canvasScrollPosition: {x: 15.909088, y: 59.16857}
+    canvasZoom: 0.8800001
   - id: 3
     fields:
     - title: Title
