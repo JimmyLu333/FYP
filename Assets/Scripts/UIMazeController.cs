@@ -21,6 +21,10 @@ public class UIMazeController : MonoBehaviour
     public float timeLimit = 60f;
     public float goalDistance = 35f;
 
+    [Header("碰撞设置")]
+    [Range(0.1f, 1f)]
+    public float ballCollisionScale = 0.6f;
+
     private float currentTime;
     private bool isPlaying;
     private Vector2 ballStartPos;
@@ -30,7 +34,10 @@ public class UIMazeController : MonoBehaviour
         if (ball != null)
             ballStartPos = ball.anchoredPosition;
 
-        StartMaze();
+        if (mazeWindowPanel != null)
+            mazeWindowPanel.SetActive(false);
+
+        isPlaying = false;
     }
 
     void Update()
@@ -82,7 +89,7 @@ public class UIMazeController : MonoBehaviour
 
     bool IsBallCollidingWithWall()
     {
-        Rect ballRect = GetRect(ball);
+        Rect ballRect = GetScaledRect(ball, ballCollisionScale);
 
         foreach (RectTransform wall in walls)
         {
@@ -103,6 +110,19 @@ public class UIMazeController : MonoBehaviour
     {
         Vector2 pos = rectTransform.anchoredPosition;
         Vector2 size = rectTransform.rect.size;
+
+        return new Rect(
+            pos.x - size.x * rectTransform.pivot.x,
+            pos.y - size.y * rectTransform.pivot.y,
+            size.x,
+            size.y
+        );
+    }
+
+    Rect GetScaledRect(RectTransform rectTransform, float scale)
+    {
+        Vector2 pos = rectTransform.anchoredPosition;
+        Vector2 size = rectTransform.rect.size * scale;
 
         return new Rect(
             pos.x - size.x * rectTransform.pivot.x,

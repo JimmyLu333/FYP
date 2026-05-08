@@ -1,21 +1,24 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
 public class VerificationCodeSystem : MonoBehaviour
 {
-    [Header("ÑéÖ¤Âë UI")]
+    [Header("éªŒè¯ç  UI")]
     public GameObject codeInputPanel;
     public TMP_InputField codeInputField;
     public TextMeshProUGUI feedbackText;
 
-    [Header("°´Å¥")]
+    [Header("æŒ‰é’®")]
     public Button codeAppButton;
     public Button confirmButton;
     public Button closeButton;
 
-    [Header("ÑéÖ¤ÂëÉèÖÃ")]
+    [Header("éªŒè¯ç è®¾ç½®")]
     public string correctCode = "734921";
+
+    [Header("è¿·å®«ç³»ç»Ÿ")]
+    public UIMazeController uiMazeController;
 
     private bool codeCompleted = false;
 
@@ -39,7 +42,6 @@ public class VerificationCodeSystem : MonoBehaviour
 
     public void OpenCodePanel()
     {
-        // ÑéÖ¤ÂëÒÑ¾­³É¹¦¹ı£¬Ö®ºóµã»÷Í¼±êÃ»ÓĞ·´Ó¦
         if (codeCompleted) return;
 
         if (codeInputPanel != null)
@@ -51,7 +53,6 @@ public class VerificationCodeSystem : MonoBehaviour
         if (feedbackText != null)
             feedbackText.text = "";
 
-        // ´ò¿ªÊäÈë¿òºó£¬ÔİÊ±½ûÓÃÍ¼±ê£¬·ÀÖ¹ÖØ¸´¿ª
         if (codeAppButton != null)
             codeAppButton.interactable = false;
     }
@@ -61,7 +62,6 @@ public class VerificationCodeSystem : MonoBehaviour
         if (codeInputPanel != null)
             codeInputPanel.SetActive(false);
 
-        // Èç¹û»¹Ã»³É¹¦ÊäÈëÑéÖ¤Âë£¬¹Ø±Õºó»Ö¸´Í¼±ê¿Éµã
         if (!codeCompleted && codeAppButton != null)
             codeAppButton.interactable = true;
     }
@@ -79,17 +79,24 @@ public class VerificationCodeSystem : MonoBehaviour
             if (codeInputPanel != null)
                 codeInputPanel.SetActive(false);
 
-            // ³É¹¦ºóÍ¼±ê±£³Ö²»¿ÉÓÃ
             if (codeAppButton != null)
                 codeAppButton.interactable = false;
 
-            Debug.Log("ÑéÖ¤ÂëÕıÈ·£¬ÏÂÒ»²½¿ÉÒÔ¿ªÆôÃÔ¹¬¡£");
+            // âœ… éªŒè¯ç æ­£ç¡®åå¯åŠ¨è¿·å®«
+            if (uiMazeController != null)
+            {
+                uiMazeController.StartMaze();
+            }
+            else
+            {
+                Debug.LogError("UIMazeController æ²¡æœ‰ç»‘å®šï¼");
+            }
         }
         else
         {
             if (feedbackText != null)
             {
-                feedbackText.text = "ÑéÖ¤Âë´íÎó£¬ÇëÖØĞÂÊäÈë¡£";
+                feedbackText.text = "éªŒè¯ç é”™è¯¯ï¼Œè¯·é‡æ–°è¾“å…¥ã€‚";
                 feedbackText.color = Color.red;
             }
         }
