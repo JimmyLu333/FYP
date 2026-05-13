@@ -11073,8 +11073,6 @@ MonoBehaviour:
   wordStops:
   - triggerText: "\u6551\u4EBA\u8981\u7D27\u554A\uFF01\u6211\u73B0\u5728\u5C31\u6765\u533B\u9662"
     pauseForMaze: 1
-  - triggerText: "\u662F\u6211\uFF0C\u4F60\u662F\u54EA\u4F4D\uFF1F"
-    pauseForMaze: 1
   waitingForMaze: 0
 --- !u!4 &2129102361
 Transform:
