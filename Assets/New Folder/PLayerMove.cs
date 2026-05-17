@@ -36,6 +36,7 @@ public class PLayerMove : MonoBehaviour
     private float defaultCameraX = 0f;
     private float stepTimer = 0f;
     private bool cameraInitialized = false;
+    private Animator animator;
 
     void Start()
     {
@@ -44,6 +45,7 @@ public class PLayerMove : MonoBehaviour
 
         controller = GetComponent<CharacterController>();
         TryFindCamera();
+        TryFindAnimator();
 
         // 监听场景加载事件，切换场景后传送到出生点
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -174,14 +176,30 @@ public class PLayerMove : MonoBehaviour
         }
     }
 
+    void TryFindAnimator()
+    {
+        if (animator != null) return;
+        animator = GetComponentInChildren<Animator>();
+    }
+
     void Update()
     {
         TryFindCamera();
+        TryFindAnimator();
         if (playerCamera == null) return;
         RotateCamera();
         MovePlayer();
         ApplyGravity();
         CameraBob();
+        UpdateAnimator();
+    }
+
+    void UpdateAnimator()
+    {
+        if (animator == null || animator.runtimeAnimatorController == null) return;
+        float speed = new Vector3(controller.velocity.x, 0, controller.velocity.z).magnitude;
+        animator.SetFloat("Speed", speed);
+        animator.SetBool("IsGrounded", controller.isGrounded);
     }
 
     private void RotateCamera()
