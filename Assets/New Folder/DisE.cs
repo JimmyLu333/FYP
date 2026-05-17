@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -9,11 +8,17 @@ public class DisE : MonoBehaviour
     public float detectionRadius = 3f;
     [Tooltip("切换目标场景名称")]
     public string targetSceneName = "";
+    [Tooltip("目标场景的出生点名称")]
+    public string targetSpawnPointName = "SpawnPoint";
     [Tooltip("提示文本（可选）")]
     public string promptText = "按 E 进入";
 
     private GameObject player;
     private bool isPlayerInRange = false;
+
+    // 静态变量：跨场景保存目标出生点名称
+    public static string nextSpawnPoint = "";
+    public static bool hasSpawnPoint = false;
 
     void Start()
     {
@@ -42,8 +47,13 @@ public class DisE : MonoBehaviour
 
     void SwitchScene()
     {
-        if (!string.IsNullOrEmpty(targetSceneName))
+        if (!string.IsNullOrEmpty(targetSceneName) && player != null)
         {
+            // 保存目标出生点名称
+            nextSpawnPoint = targetSpawnPointName;
+            hasSpawnPoint = true;
+
+            Debug.Log($"DisE: 切换到场景 {targetSceneName}，出生点 {targetSpawnPoint}");
             SceneManager.LoadScene(targetSceneName);
         }
     }
@@ -52,7 +62,9 @@ public class DisE : MonoBehaviour
     {
         if (isPlayerInRange && !string.IsNullOrEmpty(promptText))
         {
-            Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position);
+            Camera cam = Camera.main;
+            if (cam == null) return;
+            Vector3 screenPos = cam.WorldToScreenPoint(transform.position);
             if (screenPos.z > 0)
             {
                 GUI.Label(new Rect(screenPos.x - 50, Screen.height - screenPos.y - 30, 100, 30), promptText);

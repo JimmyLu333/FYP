@@ -31,25 +31,56 @@ public class PLayerMove : MonoBehaviour
     private Vector3 velocity;
     private Vector3 currentMoveVelocity;
     private float bobTimer = 0f;
-    private float defaultCameraY;
-    private float defaultCameraX;
+    private float defaultCameraY = 1.6f;
+    private float defaultCameraX = 0f;
     private float stepTimer = 0f;
+    private bool cameraInitialized = false;
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
-        playerCamera = GetComponentInChildren<Camera>();
-        if (playerCamera == null) playerCamera = Camera.main;
+        TryFindCamera();
 
-        defaultCameraY = playerCamera.transform.localPosition.y;
-        defaultCameraX = playerCamera.transform.localPosition.x;
+        // 如果有出生点，将玩家传送到出生点
+        if (DisE.hasSpawnPoint)
+        {
+            GameObject spawnPoint = GameObject.Find(DisE.nextSpawnPoint);
+            if (spawnPoint != null)
+            {
+                controller.enabled = false;
+                transform.position = spawnPoint.transform.position;
+                transform.rotation = spawnPoint.transform.rotation;
+                controller.enabled = true;
+                Debug.Log($"PLayerMove: 已传送到出生点 {DisE.nextSpawnPoint} 位置 {spawnPoint.transform.position}");
+            }
+            else
+            {
+                Debug.LogWarning($"PLayerMove: 找不到出生点 '{DisE.nextSpawnPoint}'，使用默认位置");
+            }
+            DisE.hasSpawnPoint = false;
+        }
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
+    void TryFindCamera()
+    {
+        if (playerCamera != null) return;
+        playerCamera = GetComponentInChildren<Camera>();
+        if (playerCamera == null) playerCamera = Camera.main;
+        if (playerCamera != null && !cameraInitialized)
+        {
+            defaultCameraY = playerCamera.transform.localPosition.y;
+            defaultCameraX = playerCamera.transform.localPosition.x;
+            cameraInitialized = true;
+        }
+    }
+
     void Update()
     {
+        TryFindCamera();
+        if (playerCamera == null) return;
         RotateCamera();
         MovePlayer();
         ApplyGravity();
