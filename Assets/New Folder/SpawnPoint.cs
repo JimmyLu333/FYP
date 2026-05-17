@@ -7,9 +7,9 @@ public class SpawnPoint : MonoBehaviour
     [Tooltip("出生点名称，与 DisE 的 targetSpawnPointName 对应")]
     public string spawnName = "SpawnPoint";
 
-    void Start()
+    void Awake()
     {
-        // 把对象名设为 spawnName，方便 GameObject.Find 查找
+        // 在 Awake 中设置名称，确保 OnSceneLoaded 回调时能被 GameObject.Find 找到
         gameObject.name = spawnName;
     }
 

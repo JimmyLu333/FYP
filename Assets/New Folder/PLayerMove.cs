@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(CharacterController))]
 public class PLayerMove : MonoBehaviour
@@ -12,7 +13,7 @@ public class PLayerMove : MonoBehaviour
     public float deceleration = 6f;
 
     [Header("视角设置")]
-    public float mouseSensitivity = 400f;   // 大幅提高灵敏度
+    public float mouseSensitivity = 800f;   // 灵敏度
     public float upDownLimit = 80f;
 
     [Header("走路晃动")]
@@ -38,30 +39,126 @@ public class PLayerMove : MonoBehaviour
 
     void Start()
     {
+        // 让 player 跨场景存活，切换场景时不被销毁
+        DontDestroyOnLoad(gameObject);
+
         controller = GetComponent<CharacterController>();
         TryFindCamera();
 
-        // 如果有出生点，将玩家传送到出生点
-        if (DisE.hasSpawnPoint)
-        {
-            GameObject spawnPoint = GameObject.Find(DisE.nextSpawnPoint);
-            if (spawnPoint != null)
-            {
-                controller.enabled = false;
-                transform.position = spawnPoint.transform.position;
-                transform.rotation = spawnPoint.transform.rotation;
-                controller.enabled = true;
-                Debug.Log($"PLayerMove: 已传送到出生点 {DisE.nextSpawnPoint} 位置 {spawnPoint.transform.position}");
-            }
-            else
-            {
-                Debug.LogWarning($"PLayerMove: 找不到出生点 '{DisE.nextSpawnPoint}'，使用默认位置");
-            }
-            DisE.hasSpawnPoint = false;
-        }
+        // 监听场景加载事件，切换场景后传送到出生点
+        SceneManager.sceneLoaded += OnSceneLoaded;
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // 删除新场景中多余的 Audio Listener 和 Camera，只保留 Player 上的
+        RemoveExtraAudioListeners();
+        DisableExtraCameras();
+
+        if (DisE.hasSpawnPoint)
+        {
+            StartCoroutine(TeleportToSpawnPoint());
+        }
+
+        // 重置速度，防止场景切换后继续滑动
+        velocity = Vector3.zero;
+        currentMoveVelocity = Vector3.zero;
+    }
+
+    void RemoveExtraAudioListeners()
+    {
+        AudioListener[] allListeners = FindObjectsOfType<AudioListener>();
+        AudioListener playerListener = GetComponentInChildren<AudioListener>();
+        foreach (AudioListener al in allListeners)
+        {
+            if (al != playerListener)
+            {
+                Destroy(al);
+            }
+        }
+    }
+
+    void DisableExtraCameras()
+    {
+        Camera[] allCameras = FindObjectsOfType<Camera>();
+        Camera playerCam = GetComponentInChildren<Camera>();
+        foreach (Camera cam in allCameras)
+        {
+            if (cam != playerCam)
+            {
+                cam.enabled = false;
+                Debug.Log($"PLayerMove: 禁用多余摄像机 {cam.name}");
+            }
+        }
+        if (playerCam != null)
+        {
+            playerCam.enabled = true;
+        }
+    }
+
+    System.Collections.IEnumerator TeleportToSpawnPoint()
+    {
+        // 等一帧，确保新场景中所有 Awake/Start 都已执行
+        yield return null;
+
+        string targetName = DisE.nextSpawnPoint;
+        GameObject spawnPoint = GameObject.Find(targetName);
+        Vector3 spawnPos;
+
+        if (spawnPoint != null)
+        {
+            spawnPos = spawnPoint.transform.position;
+            transform.rotation = spawnPoint.transform.rotation;
+            Debug.Log($"PLayerMove: 找到出生点 {targetName} 位置 {spawnPos}");
+        }
+        else
+        {
+            Debug.LogWarning($"PLayerMove: 找不到出生点 '{targetName}'，使用备选");
+            SpawnPoint anySpawn = FindObjectOfType<SpawnPoint>();
+            if (anySpawn != null)
+            {
+                spawnPos = anySpawn.transform.position;
+                transform.rotation = anySpawn.transform.rotation;
+                Debug.Log($"PLayerMove: 使用备选出生点 {anySpawn.spawnName}");
+            }
+            else
+            {
+                DisE.hasSpawnPoint = false;
+                yield break;
+            }
+        }
+
+        // 从出生点位置向下打射线找地面（不从上方打，避免打到天花板）
+        if (Physics.Raycast(spawnPos, Vector3.down, out RaycastHit hit, 10f))
+        {
+            spawnPos.y = hit.point.y + 0.1f;
+            Debug.Log($"PLayerMove: 贴地修正后位置 {spawnPos}");
+        }
+        else
+        {
+            // 如果向下打不到，试试从出生点稍下方开始打
+            Debug.Log($"PLayerMove: 向下未找到地面，使用出生点原始位置 {spawnPos}");
+        }
+
+        controller.enabled = false;
+        transform.position = spawnPos;
+        controller.enabled = true;
+
+        // 重置视角和鼠标锁定
+        rotationX = 0f;
+        if (playerCamera != null)
+        {
+            playerCamera.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+        }
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        DisE.hasSpawnPoint = false;
+
+        Debug.Log($"PLayerMove: 传送完成！最终位置 {transform.position}");
     }
 
     void TryFindCamera()

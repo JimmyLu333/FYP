@@ -53,7 +53,7 @@ public class DisE : MonoBehaviour
             nextSpawnPoint = targetSpawnPointName;
             hasSpawnPoint = true;
 
-            Debug.Log($"DisE: 切换到场景 {targetSceneName}，出生点 {targetSpawnPoint}");
+            Debug.Log($"DisE: 切换到场景 {targetSceneName}，出生点 {targetSpawnPointName}");
             SceneManager.LoadScene(targetSceneName);
         }
     }

@@ -13510,12 +13510,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1285814338}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.000000029802319, y: -0, z: -0.7071064, w: 0.70710725}
-  m_LocalPosition: {x: 6.49, y: 0.1, z: 5.18}
+  m_LocalRotation: {x: -0.4999997, y: 0.5000003, z: 0.5000003, w: 0.4999997}
+  m_LocalPosition: {x: 46.610004, y: 6.7487645, z: 97.66999}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2115135876}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1285814340
 MonoBehaviour:
@@ -13531,6 +13531,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   detectionRadius: 3
   targetSceneName: INSIDE
+  targetSpawnPointName: SpawnPoint
   promptText: "\u6309 E \u8FDB\u5165"
 --- !u!1 &1290162302
 GameObject:
@@ -22912,7 +22913,6 @@ Transform:
   - {fileID: 1005377008}
   - {fileID: 12525565}
   - {fileID: 1516290588}
-  - {fileID: 1285814339}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -90, y: 180, z: 0}
 --- !u!1 &2137009937
@@ -23235,4 +23235,5 @@ SceneRoots:
   - {fileID: 1593622711}
   - {fileID: 1243750669}
   - {fileID: 961142145}
+  - {fileID: 1285814339}
   - {fileID: 322001342}
