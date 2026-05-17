@@ -14,7 +14,6 @@ public class DisE : MonoBehaviour
 
     private GameObject player;
     private bool isPlayerInRange = false;
-    private bool canSwitchScene = false;
 
     void Start()
     {

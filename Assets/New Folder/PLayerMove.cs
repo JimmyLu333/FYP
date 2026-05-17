@@ -1,72 +1,147 @@
 using UnityEngine;
 
+[RequireComponent(typeof(CharacterController))]
 public class PLayerMove : MonoBehaviour
 {
-    // Íæ¼ÒÒÆ¶¯ËÙ¶È£¨¿ÉÔÚ±à¼­Æ÷ÖĞµ÷Õû£©
-    public float moveSpeed = 5f;
-    // ¾µÍ·Ğı×ªËÙ¶È£¨ÓÃÓÚÊó±êÒÆ¶¯ÁéÃô¶È£©
-    public float lookSpeed = 2f;
-    // ÉãÏñ»úÉÏÏÂĞı×ªµÄÏŞÖÆ£¨·ÀÖ¹¹ı¶ÈÑöÍû»ò¸©ÊÓ£©
-    public float upDownLimit = 90f;
+    [Header("ç§»åŠ¨è®¾ç½®")]
+    public float walkSpeed = 4f;
+    public float runSpeed = 7f;
+    public float gravity = -20f;            // åŠ å¤§é‡åŠ›ï¼Œè½åœ°æ›´å¹²è„†
+    public float jumpHeight = 1.2f;
+    public float acceleration = 8f;
+    public float deceleration = 6f;
 
-    private Camera playerCamera;          // ´æ´¢Íæ¼ÒµÄÉãÏñ»úÒıÓÃ
-    private float rotationX = 0f;        // µ±Ç°µÄÉãÏñ»úÉÏÏÂĞı×ª½Ç¶È
+    [Header("è§†è§’è®¾ç½®")]
+    public float mouseSensitivity = 400f;   // å¤§å¹…æé«˜çµæ•åº¦
+    public float upDownLimit = 80f;
+
+    [Header("èµ°è·¯æ™ƒåŠ¨")]
+    public float walkBobFrequency = 12f;    // èµ°è·¯æ­¥é¢‘
+    public float runBobFrequency = 16f;     // è·‘æ­¥æ­¥é¢‘æ›´å¿«
+    public float walkBobAmount = 0.08f;     // èµ°è·¯æ™ƒåŠ¨å¹…åº¦
+    public float runBobAmount = 0.12f;      // è·‘æ­¥æ™ƒåŠ¨æ›´å¤§
+    public float tiltAmount = 3f;           // èµ°è·¯æ—¶è§†è§’å¾®å¾®å€¾æ–œ
+
+    [Header("è„šæ­¥å£°")]
+    public float stepInterval = 0.5f;       // è„šæ­¥é—´éš”ï¼ˆç§’ï¼‰
+
+    private CharacterController controller;
+    private Camera playerCamera;
+    private float rotationX = 0f;
+    private Vector3 velocity;
+    private Vector3 currentMoveVelocity;
+    private float bobTimer = 0f;
+    private float defaultCameraY;
+    private float defaultCameraX;
+    private float stepTimer = 0f;
 
     void Start()
     {
-        // »ñÈ¡³¡¾°ÖĞÖ÷ÉãÏñ»úµÄÒıÓÃ
-        playerCamera = Camera.main;
-        // Ëø¶¨¹â±êµ½ÓÎÏ·´°¿ÚµÄÖĞĞÄ£¬²¢Òş²Ø¹â±ê
+        controller = GetComponent<CharacterController>();
+        playerCamera = GetComponentInChildren<Camera>();
+        if (playerCamera == null) playerCamera = Camera.main;
+
+        defaultCameraY = playerCamera.transform.localPosition.y;
+        defaultCameraX = playerCamera.transform.localPosition.x;
+
         Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     void Update()
     {
-        // ÔÚÃ¿Ò»Ö¡¸üĞÂÖĞ£¬µ÷ÓÃÒÆ¶¯ºÍĞı×ªµÄ·½·¨
-        MovePlayer();
         RotateCamera();
-    }
-
-    private void MovePlayer()
-    {
-        // »ñÈ¡Ë®Æ½ÊäÈë£¨A/D»ò¼ıÍ·×ó/ÓÒ£©
-        float moveHorizontal = Input.GetAxis("Horizontal");
-        // »ñÈ¡´¹Ö±ÊäÈë£¨W/S»ò¼ıÍ·ÉÏ/ÏÂ£©
-        float moveVertical = Input.GetAxis("Vertical");
-
-        // ´´½¨Ò»¸öĞÂµÄÏòÁ¿ÓÃÓÚ¼ÆËãÒÆ¶¯·½Ïò
-        // ½«ÊäÈë¹éÒ»»¯ÒÔ±ÜÃâ¶Ô½ÇÏßÒÆ¶¯ËÙ¶È¸ü¿ìµÄÎÊÌâ
-        Vector3 moveDirection = new Vector3(moveHorizontal, 0, moveVertical).normalized;
-        // ½«¾Ö²¿×ø±ê·½Ïò×ª»»ÎªÊÀ½ç×ø±ê·½Ïò
-        moveDirection = transform.TransformDirection(moveDirection);
-
-        // ¸ù¾İ¼ÆËã³öµÄ·½ÏòºÍËÙ¶È¸üĞÂÍæ¼ÒµÄÎ»ÖÃ
-        // Time.deltaTime È·±£Ã¿Ö¡ÒÆ¶¯±£³ÖÆ½»¬ÇÒÓëÖ¡ÂÊÎŞ¹Ø
-        transform.position += moveDirection * moveSpeed * Time.deltaTime;
+        MovePlayer();
+        ApplyGravity();
+        CameraBob();
     }
 
     private void RotateCamera()
     {
-        // »ñÈ¡Êó±êµÄË®Æ½ÒÆ¶¯Á¿²¢Ó¦ÓÃĞı×ªËÙ¶È
-        float mouseX = Input.GetAxis("Mouse X") * lookSpeed * Time.deltaTime;
-        // »ñÈ¡Êó±êµÄ´¹Ö±ÒÆ¶¯Á¿²¢Ó¦ÓÃĞı×ªËÙ¶È
-        float mouseY = Input.GetAxis("Mouse Y") * lookSpeed * Time.deltaTime;
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
+        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
-        // Ğı×ªÍæ¼Ò¶ÔÏó£¨YÖáĞı×ª£©
-        transform.Rotate(0, mouseX, 0);
-        //float mouseY = -Input.GetAxisRaw("Mouse Y") * LookSpeed;
+        // æ°´å¹³æ—‹è½¬ï¼šæ—‹è½¬ç©å®¶æœ¬ä½“ï¼ˆå·¦å³çœ‹ï¼‰
+        transform.Rotate(0f, mouseX, 0f);
 
-
-        //rotationX = rotationX + mouseY;
-        //rotationX += mouseY;
-
-        // ¸üĞÂÉãÏñ»úµÄÉÏÏÂĞı×ª½Ç¶È£¬ÏòÏÂ¹ö¶¯Îª¸º£¬ÏòÉÏ¹ö¶¯ÎªÕı
-        //rotationX = rotationX - mouseY;
+        // å‚ç›´æ—‹è½¬ï¼šæ—‹è½¬æ‘„åƒæœºï¼ˆä¸Šä¸‹çœ‹ï¼‰
         rotationX -= mouseY;
-
-        // ÏŞÖÆÉãÏñ»úµÄÉÏÏÂĞı×ª½Ç¶È£¬·ÀÖ¹³¬³öÉè¶¨·¶Î§
         rotationX = Mathf.Clamp(rotationX, -upDownLimit, upDownLimit);
-        // ÉèÖÃÉãÏñ»ú±¾µØĞı×ª£¨½öYÖá£¬²»Ó°ÏìYÖá£©
-        playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
+        playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0f, 0f);
+    }
+
+    private void MovePlayer()
+    {
+        float h = Input.GetAxis("Horizontal"); // A/D
+        float v = Input.GetAxis("Vertical");   // W/S
+
+        bool running = Input.GetKey(KeyCode.LeftShift);
+        float targetSpeed = running ? runSpeed : walkSpeed;
+
+        Vector3 moveDir = transform.right * h + transform.forward * v;
+        if (moveDir.magnitude > 1f) moveDir.Normalize();
+        Vector3 targetVelocity = moveDir * targetSpeed;
+
+        float accel = (moveDir.magnitude > 0.1f) ? acceleration : deceleration;
+        currentMoveVelocity = Vector3.Lerp(currentMoveVelocity, targetVelocity, accel * Time.deltaTime);
+
+        controller.Move(currentMoveVelocity * Time.deltaTime);
+    }
+
+    private void ApplyGravity()
+    {
+        if (controller.isGrounded && velocity.y < 0f)
+        {
+            velocity.y = -4f; // è´´åœ°æ›´ç´§ï¼Œé˜²æ­¢æµ®ç©º
+        }
+
+        if (controller.isGrounded && Input.GetButtonDown("Jump"))
+        {
+            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        }
+
+        velocity.y += gravity * Time.deltaTime;
+        controller.Move(velocity * Time.deltaTime);
+    }
+
+    private void CameraBob()
+    {
+        float horizontalSpeed = new Vector3(controller.velocity.x, 0, controller.velocity.z).magnitude;
+        bool running = Input.GetKey(KeyCode.LeftShift);
+        float freq = running ? runBobFrequency : walkBobFrequency;
+        float amount = running ? runBobAmount : walkBobAmount;
+
+        if (controller.isGrounded && horizontalSpeed > 0.5f)
+        {
+            bobTimer += Time.deltaTime * freq;
+            float bobY = Mathf.Sin(bobTimer) * amount;
+            float bobX = Mathf.Cos(bobTimer * 0.5f) * amount * 0.6f;
+
+            // èµ°è·¯æ—¶è§†è§’å¾®å¾®å·¦å³å€¾æ–œï¼Œæ›´åƒäºº
+            float tiltZ = Mathf.Cos(bobTimer) * tiltAmount * (running ? 1.5f : 1f);
+
+            Vector3 pos = playerCamera.transform.localPosition;
+            pos.y = defaultCameraY + bobY;
+            pos.x = defaultCameraX + bobX;
+            playerCamera.transform.localPosition = pos;
+
+            playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0f, tiltZ);
+        }
+        else
+        {
+            bobTimer = 0f;
+            Vector3 pos = playerCamera.transform.localPosition;
+            pos.y = Mathf.Lerp(pos.y, defaultCameraY, 8f * Time.deltaTime);
+            pos.x = Mathf.Lerp(pos.x, defaultCameraX, 8f * Time.deltaTime);
+            playerCamera.transform.localPosition = pos;
+
+            playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0f, Mathf.Lerp(playerCamera.transform.localEulerAngles.z, 0f, 8f * Time.deltaTime));
+        }
+    }
+
+    // ç¡®ä¿ç¢°æ’æ­£å¸¸å·¥ä½œ
+    void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        // CharacterController è‡ªå¸¦ç¢°æ’ï¼Œè¿™é‡Œå¯ä»¥å¤„ç†æ¨ç‰©ä½“ç­‰é€»è¾‘
     }
 }
