@@ -252,7 +252,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 1
@@ -3303,7 +3303,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1765402159
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3465,7 +3465,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 243, y: 16}
-  m_SizeDelta: {x: -700, y: -120.9591}
+  m_SizeDelta: {x: -700, y: -120.95911}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1775854853
 MonoBehaviour:
@@ -4450,6 +4450,8 @@ MonoBehaviour:
     scoreGain: -10
   - choiceText: "\u5BF9\uFF0C\u4F60\u51FA\u6765\u5C31\u80FD\u770B\u5230\u6211\u3002\u6211\u4E3E\u4E2A\u724C\u5B50\u7B49\u4F60\uFF0C\u4E0A\u9762\u5199\u4F60\u540D\u5B57\uFF0C\u591F\u9686\u91CD\u5427\uFF1F\u522B\u5230\u65F6\u5019\u8BA4\u4E0D\u51FA\u8205\u8205\u4E86\u3002"
     scoreGain: 5
+  wordStops: []
+  waitingForMaze: 0
 --- !u!4 &2129102361
 Transform:
   m_ObjectHideFlags: 0
