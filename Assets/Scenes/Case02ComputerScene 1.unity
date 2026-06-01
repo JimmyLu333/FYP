@@ -11085,6 +11085,7 @@ MonoBehaviour:
   chatPanel: {fileID: 1775854848}
   chatUIManager: {fileID: 1775854853}
   nameText: {fileID: 1504399077}
+  nameText2: {fileID: 0}
   choiceButton1: {fileID: 1522171022}
   choiceButton2: {fileID: 450383265}
   choiceButton3: {fileID: 1984091294}

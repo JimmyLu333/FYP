@@ -5353,7 +5353,7 @@ MonoBehaviour:
   - id: 3
     fields:
     - title: Title
-      value: Case03Conversation
+      value: Case02
       type: 0
       typeString: 
     - title: Description
@@ -5361,11 +5361,11 @@ MonoBehaviour:
       type: 0
       typeString: 
     - title: Actor
-      value: 1
+      value: 6
       type: 5
       typeString: CustomFieldType_Actor
     - title: Conversant
-      value: 2
+      value: 7
       type: 5
       typeString: CustomFieldType_Actor
     overrideSettings:
@@ -5408,11 +5408,11 @@ MonoBehaviour:
         type: 0
         typeString: 
       - title: Actor
-        value: 1
+        value: 6
         type: 5
         typeString: CustomFieldType_Actor
       - title: Conversant
-        value: 2
+        value: 7
         type: 5
         typeString: CustomFieldType_Actor
       - title: Menu Text
@@ -5680,7 +5680,7 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 161.96527
+        x: 160.45012
         y: 409.80063
         width: 160
         height: 30
@@ -6742,8 +6742,8 @@ MonoBehaviour:
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 0, y: 0}
-    canvasZoom: 0.6600001
+    canvasScrollPosition: {x: 61.666656, y: 5}
+    canvasZoom: 0.60000014
   - id: 4
     fields:
     - title: Title
@@ -6802,7 +6802,7 @@ MonoBehaviour:
         type: 0
         typeString: 
       - title: Actor
-        value: 1
+        value: 8
         type: 5
         typeString: CustomFieldType_Actor
       - title: Conversant
@@ -6842,7 +6842,7 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 161
+        x: 163.27272
         y: 29
         width: 160
         height: 30
@@ -6897,8 +6897,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 163
-        y: 146
+        x: 158.45456
+        y: 148.27272
         width: 160
         height: 30
     - id: 2
@@ -7008,7 +7008,7 @@ MonoBehaviour:
       canvasRect:
         serializedVersion: 2
         x: 164
-        y: 368
+        y: 369.13638
         width: 160
         height: 30
     - id: 4
@@ -7061,7 +7061,7 @@ MonoBehaviour:
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 0, y: 224.99994}
+    canvasScrollPosition: {x: 0, y: 0}
     canvasZoom: 0.8800001
   syncInfo:
     syncActors: 0

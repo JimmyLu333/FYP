@@ -5,6 +5,8 @@ using PixelCrushers.DialogueSystem;
 public class StartDialogueOnClick : MonoBehaviour
 {
     public DialogueChatBridge dialogueChatBridge;
+    public DialogueEventRouter router;
+
     public string conversationName = "ScamChatExample";
 
     private Button button;
@@ -24,7 +26,11 @@ public class StartDialogueOnClick : MonoBehaviour
         if (button != null)
             button.interactable = false;
 
-        // 如果之前还有残留对话，先停掉
+        // 切换到聊天模式
+        if (router != null)
+            router.SetChatMode();
+
+        // 清理残留对话
         if (DialogueManager.isConversationActive)
         {
             DialogueManager.StopConversation();
