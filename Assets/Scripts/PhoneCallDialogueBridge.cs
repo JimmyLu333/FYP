@@ -193,4 +193,17 @@ public class PhoneCallDialogueBridge : MonoBehaviour
         if (phoneCallPanel != null)
             phoneCallPanel.SetActive(false);
     }
+
+    [Header("电话结束后的资料检查")]
+    public FormCheckPanelController formCheckPanelController;
+
+    public void OnPhoneConversationEnd(Transform actor)
+    {
+        if (phoneCallPanel != null)
+            phoneCallPanel.SetActive(false);
+
+        if (formCheckPanelController != null)
+            formCheckPanelController.StartCheckSequence();
+    }
+
 }

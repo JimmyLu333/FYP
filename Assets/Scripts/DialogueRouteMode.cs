@@ -57,4 +57,16 @@ public class DialogueEventRouter : MonoBehaviour
                 phoneBridge.OnConversationResponseMenu(responses);
         }
     }
+    public void OnConversationEnd(Transform actor)
+    {
+        if (currentMode == DialogueRouteMode.Chat)
+        {
+            // 暂时不用处理
+        }
+        else if (currentMode == DialogueRouteMode.Phone)
+        {
+            if (phoneBridge != null)
+                phoneBridge.OnPhoneConversationEnd(actor);
+        }
+    }
 }
