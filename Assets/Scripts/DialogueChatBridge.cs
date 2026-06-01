@@ -26,6 +26,7 @@ public class DialogueChatBridge : MonoBehaviour
     public GameObject chatPanel;
     public ChatUIManager chatUIManager;
     public TextMeshProUGUI nameText;
+    public TextMeshProUGUI nameText2;
 
     [Header("选项按钮")]
     public Button choiceButton1;
@@ -75,6 +76,9 @@ public class DialogueChatBridge : MonoBehaviour
         if (nameText != null)
             nameText.text = npcName;
 
+        if (nameText != null)
+            nameText2.text = npcName;
+
         currentScamRate = 0;
         UpdateScamRateUI();
     }
@@ -90,6 +94,9 @@ public class DialogueChatBridge : MonoBehaviour
 
         if (nameText != null)
             nameText.text = npcName;
+
+        if (nameText != null)
+            nameText2.text = npcName;
 
         DialogueManager.StartConversation(conversationTitle);
     }

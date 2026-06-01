@@ -5,6 +5,8 @@ using PixelCrushers.DialogueSystem;
 public class StartPhoneCallOnClick : MonoBehaviour
 {
     public PhoneCallDialogueBridge phoneCallDialogueBridge;
+    public DialogueEventRouter router;
+
     public string conversationName = "Case02PhoneCall";
 
     private Button button;
@@ -22,6 +24,10 @@ public class StartPhoneCallOnClick : MonoBehaviour
             Debug.LogError("PhoneCallDialogueBridge 没有绑定！");
             return;
         }
+
+        // 切换到电话模式
+        if (router != null)
+            router.SetPhoneMode();
 
         if (DialogueManager.isConversationActive)
         {
