@@ -65,6 +65,10 @@ public class DialogueChatBridge : MonoBehaviour
     [Header("迷宫等待")]
     public bool waitingForMaze = false;
 
+    [Header("Case03 压力系统")]
+    public bool enableCase03Pressure = false;
+    public Case03ChoicePressure case03ChoicePressure;
+
     private Response[] currentResponses;
     private Response[] pendingResponses;
     private bool suppressNextPlayerLine = false;
@@ -76,7 +80,7 @@ public class DialogueChatBridge : MonoBehaviour
         if (nameText != null)
             nameText.text = npcName;
 
-        if (nameText != null)
+        if (nameText2 != null)
             nameText2.text = npcName;
 
         currentScamRate = 0;
@@ -95,7 +99,7 @@ public class DialogueChatBridge : MonoBehaviour
         if (nameText != null)
             nameText.text = npcName;
 
-        if (nameText != null)
+        if (nameText2 != null)
             nameText2.text = npcName;
 
         DialogueManager.StartConversation(conversationTitle);
@@ -206,6 +210,30 @@ public class DialogueChatBridge : MonoBehaviour
 
         if (responses.Length > 2)
             SetupChoiceButton(choiceButton3, choiceButtonText3, responses[2], 2);
+
+        RegisterChoicesToPressureSystem();
+    }
+
+    private void RegisterChoicesToPressureSystem()
+    {
+        if (!enableCase03Pressure) return;
+        if (case03ChoicePressure == null) return;
+
+        Button[] buttons =
+        {
+            choiceButton1,
+            choiceButton2,
+            choiceButton3
+        };
+
+        TextMeshProUGUI[] texts =
+        {
+            choiceButtonText1,
+            choiceButtonText2,
+            choiceButtonText3
+        };
+
+        case03ChoicePressure.RegisterChoices(buttons, texts);
     }
 
     public void ContinueAfterMaze()
@@ -226,6 +254,7 @@ public class DialogueChatBridge : MonoBehaviour
             return;
 
         button.gameObject.SetActive(true);
+        button.interactable = true;
         buttonText.text = response.formattedText.text;
 
         button.onClick.RemoveAllListeners();
