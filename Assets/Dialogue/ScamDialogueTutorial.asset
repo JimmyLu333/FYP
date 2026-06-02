@@ -300,6 +300,20 @@ MonoBehaviour:
       value: 
       type: 0
       typeString: 
+  - id: 4
+    fields:
+    - title: Name
+      value: StartFlashback
+      type: 0
+      typeString: 
+    - title: Initial Value
+      value: False
+      type: 2
+      typeString: CustomFieldType_Boolean
+    - title: Description
+      value: 
+      type: 0
+      typeString: 
   conversations:
   - id: 1
     fields:
@@ -7490,10 +7504,7 @@ MonoBehaviour:
         isConnector: 0
         priority: 2
       conditionsString: 
-      userScript: 'Variable["InnerVoiceIndex"] = 0;
-
-        Variable["PlayInnerVoice"]
-        = true'
+      userScript: Variable["StartFlashback"] = true
       onExecute:
         m_PersistentCalls:
           m_Calls: []

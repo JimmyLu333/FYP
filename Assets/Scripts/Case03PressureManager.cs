@@ -21,9 +21,11 @@ public class Case03PressureManager : MonoBehaviour
 
     [Header("Case03系统")]
     public Case03ChoicePressure choicePressure;
+    public Case03FlashbackManager flashbackManager;
 
     [Header("内心独白 UI")]
     public GameObject innerVoicePanel;
+    public CanvasGroup innerVoiceCanvasGroup;
     public TextMeshProUGUI innerVoiceText;
 
     [Header("内心独白数组")]
@@ -35,13 +37,9 @@ public class Case03PressureManager : MonoBehaviour
     public float stayDuration = 2f;
 
     [Header("淡入淡出设置")]
-    public CanvasGroup innerVoiceCanvasGroup;
     public float fadeDuration = 0.35f;
 
     private Coroutine innerVoiceCoroutine;
-
-    private bool lastPlayInnerVoice = false;
-
 
     void Start()
     {
@@ -57,17 +55,29 @@ public class Case03PressureManager : MonoBehaviour
 
     void Update()
     {
-        bool playInnerVoice = DialogueLua.GetVariable("PlayInnerVoice").asBool;
+        CheckDialogueTriggers();
+    }
 
-        if (playInnerVoice && !lastPlayInnerVoice)
+    void CheckDialogueTriggers()
+    {
+        if (DialogueLua.GetVariable("PlayInnerVoice").asBool)
         {
             int index = DialogueLua.GetVariable("InnerVoiceIndex").asInt;
             PlayInnerVoiceByIndex(index);
-
             DialogueLua.SetVariable("PlayInnerVoice", false);
         }
 
-        lastPlayInnerVoice = playInnerVoice;
+        if (DialogueLua.GetVariable("StartMouseShake").asBool)
+        {
+            StartMouseShakeStage();
+            DialogueLua.SetVariable("StartMouseShake", false);
+        }
+
+        if (DialogueLua.GetVariable("StartFlashback").asBool)
+        {
+            StartFlashbackStage();
+            DialogueLua.SetVariable("StartFlashback", false);
+        }
     }
 
     public void SetStage(PressureStage newStage)
@@ -93,31 +103,6 @@ public class Case03PressureManager : MonoBehaviour
         ShowInnerVoice(innerVoiceLines[index]);
     }
 
-    public void PlayInnerVoiceSequence(int startIndex, int count)
-    {
-        if (innerVoiceLines == null || innerVoiceLines.Length == 0)
-        {
-            Debug.LogWarning("InnerVoiceLines 还没有填写。");
-            return;
-        }
-
-        if (startIndex < 0 || startIndex >= innerVoiceLines.Length)
-        {
-            Debug.LogWarning("InnerVoice startIndex 超出范围：" + startIndex);
-            return;
-        }
-
-        int endIndex = Mathf.Min(startIndex + count, innerVoiceLines.Length);
-        string[] selectedLines = new string[endIndex - startIndex];
-
-        for (int i = 0; i < selectedLines.Length; i++)
-        {
-            selectedLines[i] = innerVoiceLines[startIndex + i];
-        }
-
-        ShowInnerVoices(selectedLines);
-    }
-
     public void ShowInnerVoice(string text)
     {
         SetStage(PressureStage.InnerVoice);
@@ -128,20 +113,11 @@ public class Case03PressureManager : MonoBehaviour
         innerVoiceCoroutine = StartCoroutine(InnerVoiceRoutine(text));
     }
 
-    public void ShowInnerVoices(string[] texts)
-    {
-        SetStage(PressureStage.InnerVoice);
-
-        if (innerVoiceCoroutine != null)
-            StopCoroutine(innerVoiceCoroutine);
-
-        innerVoiceCoroutine = StartCoroutine(InnerVoicesRoutine(texts));
-    }
-
     private IEnumerator InnerVoiceRoutine(string text)
     {
         if (innerVoicePanel != null)
             innerVoicePanel.SetActive(true);
+
         yield return FadeCanvasGroup(innerVoiceCanvasGroup, 0f, 1f, fadeDuration);
 
         if (innerVoiceText != null)
@@ -160,31 +136,6 @@ public class Case03PressureManager : MonoBehaviour
         yield return StartCoroutine(HideInnerVoiceRoutine());
     }
 
-    private IEnumerator InnerVoicesRoutine(string[] texts)
-    {
-        if (innerVoicePanel != null)
-            innerVoicePanel.SetActive(true);
-        yield return FadeCanvasGroup(innerVoiceCanvasGroup, 0f, 1f, fadeDuration);
-
-        foreach (string line in texts)
-        {
-            if (innerVoiceText != null)
-                innerVoiceText.text = "";
-
-            foreach (char c in line)
-            {
-                if (innerVoiceText != null)
-                    innerVoiceText.text += c;
-
-                yield return new WaitForSeconds(typingSpeed);
-            }
-
-            yield return new WaitForSeconds(stayDuration);
-        }
-
-        yield return StartCoroutine(HideInnerVoiceRoutine());
-    }
-
     private IEnumerator HideInnerVoiceRoutine()
     {
         yield return FadeCanvasGroup(innerVoiceCanvasGroup, 1f, 0f, fadeDuration);
@@ -194,6 +145,23 @@ public class Case03PressureManager : MonoBehaviour
 
         if (innerVoiceText != null)
             innerVoiceText.text = "";
+    }
+
+    private IEnumerator FadeCanvasGroup(CanvasGroup group, float from, float to, float duration)
+    {
+        if (group == null) yield break;
+
+        float time = 0f;
+        group.alpha = from;
+
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            group.alpha = Mathf.Lerp(from, to, time / duration);
+            yield return null;
+        }
+
+        group.alpha = to;
     }
 
     public void StartMouseShakeStage()
@@ -214,20 +182,13 @@ public class Case03PressureManager : MonoBehaviour
         Debug.Log("鼠标颤抖阶段结束");
     }
 
-    private IEnumerator FadeCanvasGroup(CanvasGroup group, float from, float to, float duration)
+    public void StartFlashbackStage()
     {
-        if (group == null) yield break;
+        SetStage(PressureStage.Flashback);
 
-        float time = 0f;
-        group.alpha = from;
+        if (flashbackManager != null)
+            flashbackManager.PlayFlashback();
 
-        while (time < duration)
-        {
-            time += Time.deltaTime;
-            group.alpha = Mathf.Lerp(from, to, time / duration);
-            yield return null;
-        }
-
-        group.alpha = to;
+        Debug.Log("新闻闪回阶段开始");
     }
 }
