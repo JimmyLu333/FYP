@@ -169,8 +169,12 @@ public class PauseMenuController : MonoBehaviour
     public void OnClickReturnToMainMenu()
     {
         Debug.Log("【执行】正在准备返回主菜单页面...");
-        Time.timeScale = 1f; // 加载新场景前恢复时间轴
-        // SceneManager.LoadScene("MainMenu"); // 如果有主菜单场景请取消注释
+        
+        // 🚨 极其重要：加载新场景前必须恢复时间轴！否则主菜单的时间也会是静止的，导致主菜单按钮点不动
+        Time.timeScale = 1f; 
+
+        // 🚨 已经为你改好：精准对齐你的场景文件名 "main menu"
+        SceneManager.LoadScene("main menu"); 
     }
 
     // ==========================================
