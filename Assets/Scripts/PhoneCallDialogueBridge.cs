@@ -12,6 +12,13 @@ public class PhoneCallDialogueBridge : MonoBehaviour
     public TextMeshProUGUI callerNameText;
     public TextMeshProUGUI callStatusText;
 
+    [Header("诈骗成功率UI")]
+    public TextMeshProUGUI scamRateText;
+    public int maxScamRate = 100;
+
+    [Header("选项加分规则")]
+    public ChoiceScoreRule[] choiceScoreRules;
+
     [Header("选项按钮")]
     public Button choiceButton1;
     public Button choiceButton2;
@@ -34,8 +41,14 @@ public class PhoneCallDialogueBridge : MonoBehaviour
     public float npcReplyDelay = 1.2f;
     public float playerAutoDelay = 1.0f;
 
+    [Header("电话结束后的资料检查")]
+    public Button phoneAppButton;
+    public FormCheckPanelController formCheckPanelController;
+    public float formCheckDelay = 2f;
+
     private Response[] currentResponses;
     private bool suppressNextPlayerLine = false;
+    private Coroutine phoneEndCoroutine;
 
     private void Start()
     {
@@ -46,6 +59,8 @@ public class PhoneCallDialogueBridge : MonoBehaviour
 
         if (callStatusText != null)
             callStatusText.text = "通话中...";
+
+        UpdateScamRateUI();
     }
 
     public void OpenPhoneCallAndStartConversation(string conversationTitle)
@@ -62,6 +77,8 @@ public class PhoneCallDialogueBridge : MonoBehaviour
 
         if (callStatusText != null)
             callStatusText.text = "通话中...";
+
+        UpdateScamRateUI();
 
         DialogueManager.StartConversation(conversationTitle);
     }
@@ -161,6 +178,11 @@ public class PhoneCallDialogueBridge : MonoBehaviour
         if (phoneCallUIManager != null)
             phoneCallUIManager.AddRightMessage(playerName, selectedText);
 
+        int scoreGain = GetScoreGainForChoice(selectedText);
+        ScamScoreData.CurrentScamRate += scoreGain;
+        ScamScoreData.CurrentScamRate = Mathf.Clamp(ScamScoreData.CurrentScamRate, 0, maxScamRate);
+        UpdateScamRateUI();
+
         HideChoiceButtons();
         suppressNextPlayerLine = true;
 
@@ -173,6 +195,25 @@ public class PhoneCallDialogueBridge : MonoBehaviour
                 new SelectedResponseEventArgs(selectedResponse)
             );
         }
+    }
+
+    private int GetScoreGainForChoice(string selectedChoiceText)
+    {
+        if (choiceScoreRules == null) return 0;
+
+        foreach (ChoiceScoreRule rule in choiceScoreRules)
+        {
+            if (rule != null && rule.choiceText == selectedChoiceText)
+                return rule.scoreGain;
+        }
+
+        return 0;
+    }
+
+    private void UpdateScamRateUI()
+    {
+        if (scamRateText != null)
+            scamRateText.text = "诈骗成功率：" + ScamScoreData.CurrentScamRate + "%";
     }
 
     private void HideChoiceButtons()
@@ -194,16 +235,27 @@ public class PhoneCallDialogueBridge : MonoBehaviour
             phoneCallPanel.SetActive(false);
     }
 
-    [Header("电话结束后的资料检查")]
-    public FormCheckPanelController formCheckPanelController;
-
     public void OnPhoneConversationEnd(Transform actor)
+    {
+        if (phoneEndCoroutine != null)
+            StopCoroutine(phoneEndCoroutine);
+
+        phoneEndCoroutine = StartCoroutine(PhoneEndRoutine());
+    }
+
+    private IEnumerator PhoneEndRoutine()
     {
         if (phoneCallPanel != null)
             phoneCallPanel.SetActive(false);
 
+        if (phoneAppButton != null)
+            phoneAppButton.interactable = false;
+
+        yield return new WaitForSeconds(formCheckDelay);
+
         if (formCheckPanelController != null)
             formCheckPanelController.StartCheckSequence();
+        else
+            Debug.LogError("FormCheckPanelController 没有绑定！");
     }
-
 }
