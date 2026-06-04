@@ -12,8 +12,12 @@ public class CodeRainPuzzle : MonoBehaviour
     public RectTransform rainArea;
     public GameObject numberTextPrefab;
 
-    [Header("输入框")]
-    public TMP_InputField[] codeInputs;
+    [Header(" 新·黑客单行输入框架")]
+    [Tooltip("核心驱动：把场景里原来的任意一个 InputField 拖进来，用来接管键盘输入")]
+    public TMP_InputField masterInputField;
+    
+    [Tooltip("终端显示：对应图2中负责显示 [ 6  3  _ ] 的那个单条 TextMeshPro 物体")]
+    public TextMeshProUGUI terminalTextDisplay;
 
     [Header("提示")]
     public TextMeshProUGUI feedbackText;
@@ -32,7 +36,6 @@ public class CodeRainPuzzle : MonoBehaviour
     public float targetSpawnIntervalMin = 0.8f;
     public float targetSpawnIntervalMax = 1.6f;
     public float targetXRandomOffset = 12f;
-    public float targetRespawnDelay = 2.5f;
 
     [Header("成功设置")]
     public float successDelay = 1.2f;
@@ -43,6 +46,7 @@ public class CodeRainPuzzle : MonoBehaviour
 
     private Coroutine normalRainCoroutine;
     private Coroutine targetRainCoroutine;
+    private Coroutine cursorBlinkCoroutine; // 🚨 用于控制下划线光标闪烁
 
     private List<GameObject> spawnedNumbers = new List<GameObject>();
 
@@ -54,32 +58,20 @@ public class CodeRainPuzzle : MonoBehaviour
         if (feedbackText != null)
             feedbackText.text = "";
 
-        SetupInputs();
+        SetupMasterInput();
     }
 
-    void SetupInputs()
+    void SetupMasterInput()
     {
-        if (codeInputs == null) return;
+        if (masterInputField == null) return;
 
-        for (int i = 0; i < codeInputs.Length; i++)
-        {
-            int index = i;
+        // 强行将核心输入框限制为验证码的真实长度，并只允许输入纯数字
+        masterInputField.characterLimit = targetCode.Length;
+        masterInputField.contentType = TMP_InputField.ContentType.IntegerNumber;
 
-            if (codeInputs[i] == null) continue;
-
-            codeInputs[i].characterLimit = 1;
-            codeInputs[i].contentType = TMP_InputField.ContentType.IntegerNumber;
-
-            codeInputs[i].onValueChanged.RemoveAllListeners();
-            codeInputs[i].onValueChanged.AddListener((value) => OnInputChanged(index, value));
-        }
-    }
-
-    void Update()
-    {
-        if (!isRunning || puzzleCompleted) return;
-
-        HandleBackspace();
+        // 监听玩家打字状态
+        masterInputField.onValueChanged.RemoveAllListeners();
+        masterInputField.onValueChanged.AddListener(OnTerminalInputChanged);
     }
 
     public void StartCodeRain()
@@ -88,7 +80,13 @@ public class CodeRainPuzzle : MonoBehaviour
             codeRainPanel.SetActive(true);
 
         ClearOldNumbers();
-        ClearInputs();
+
+        if (masterInputField != null)
+        {
+            masterInputField.text = "";
+            masterInputField.Select();
+            masterInputField.ActivateInputField(); // 强行让隐形输入框吃焦
+        }
 
         if (feedbackText != null)
             feedbackText.text = "";
@@ -98,32 +96,75 @@ public class CodeRainPuzzle : MonoBehaviour
 
         normalRainCoroutine = StartCoroutine(SpawnNormalRainRoutine());
         targetRainCoroutine = StartCoroutine(SpawnTargetRainRoutine());
-
-        FocusInput(0);
+        
+        //  启动终端光标闪烁效果
+        if (cursorBlinkCoroutine != null) StopCoroutine(cursorBlinkCoroutine);
+        cursorBlinkCoroutine = StartCoroutine(TerminalCursorBlinkRoutine());
     }
 
-    void ClearInputs()
+    // 【核心修复】：当玩家按键打字或退格时，实时刷新图2的终端黑客文本样式
+    void OnTerminalInputChanged(string currentText)
     {
-        if (codeInputs == null) return;
+        if (!isRunning || puzzleCompleted) return;
 
-        foreach (TMP_InputField input in codeInputs)
+        UpdateTerminalDisplay(currentText, true);
+
+        // 自动校验密码是否填满且正确
+        if (currentText.Length >= targetCode.Length)
         {
-            if (input != null)
-                input.text = "";
+            if (currentText == targetCode)
+            {
+                StartCoroutine(SuccessRoutine());
+            }
+            else
+            {
+                if (feedbackText != null)
+                {
+                    feedbackText.text = "验证码顺序错误。";
+                    feedbackText.color = Color.red;
+                }
+            }
         }
     }
 
-    void ClearOldNumbers()
+    // 格式化输出字符串：缩减空格间距
+    void UpdateTerminalDisplay(string currentInput, bool showCursor)
     {
-        foreach (GameObject obj in spawnedNumbers)
+        if (terminalTextDisplay == null) return;
+
+        string formattedText = "";
+
+        // 1. 铺设已经打出来的数字，中间只留 1 个普通空格
+        for (int i = 0; i < currentInput.Length; i++)
         {
-            if (obj != null)
-                Destroy(obj);
+            formattedText += currentInput[i] + "  "; // 💡 核心改动：把原来的 "   " 改成了 " "
         }
 
-        spawnedNumbers.Clear();
+        // 2. 如果还没输满，并且光标状态为可见，则在末尾追加黑客光标
+        if (currentInput.Length < targetCode.Length && showCursor)
+        {
+            formattedText += "_";
+        }
+
+        terminalTextDisplay.text = formattedText;
     }
 
+    //  经典的下划线终端光标每隔 0.45 秒闪烁一次的协程逻辑
+    IEnumerator TerminalCursorBlinkRoutine()
+    {
+        bool cursorOn = true;
+        while (isRunning && !puzzleCompleted)
+        {
+            string currentText = masterInputField != null ? masterInputField.text : "";
+            UpdateTerminalDisplay(currentText, cursorOn);
+            cursorOn = !cursorOn;
+            yield return new WaitForSeconds(0.45f);
+        }
+    }
+
+    // ==========================================
+    // --- 数字雨生成逻辑（完美兼容原逻辑） ---
+    // ==========================================
     IEnumerator SpawnNormalRainRoutine()
     {
         while (isRunning)
@@ -132,7 +173,6 @@ public class CodeRainPuzzle : MonoBehaviour
             {
                 SpawnNormalNumber();
             }
-
             yield return new WaitForSeconds(normalSpawnInterval);
         }
     }
@@ -160,8 +200,7 @@ public class CodeRainPuzzle : MonoBehaviour
         float x = Random.Range(-areaWidth / 2f + 20f, areaWidth / 2f - 20f);
         float y = areaHeight / 2f + 30f;
 
-        if (rt != null)
-            rt.anchoredPosition = new Vector2(x, y);
+        if (rt != null) rt.anchoredPosition = new Vector2(x, y);
 
         float speed = Random.Range(normalFallSpeedMin, normalFallSpeedMax);
         StartCoroutine(FallRoutine(obj, speed));
@@ -173,19 +212,16 @@ public class CodeRainPuzzle : MonoBehaviour
         {
             if (!string.IsNullOrEmpty(targetCode))
             {
-                int index = Random.Range(0, Mathf.Min(targetCode.Length, codeInputs.Length));
+                int index = Random.Range(0, targetCode.Length);
                 SpawnTargetNumber(index, targetCode[index].ToString());
             }
-
             yield return new WaitForSeconds(Random.Range(targetSpawnIntervalMin, targetSpawnIntervalMax));
         }
     }
 
     void SpawnTargetNumber(int index, string digit)
     {
-        if (numberTextPrefab == null || rainArea == null) return;
-        if (codeInputs == null || index >= codeInputs.Length) return;
-        if (codeInputs[index] == null) return;
+        if (numberTextPrefab == null || rainArea == null || terminalTextDisplay == null) return;
 
         GameObject obj = Instantiate(numberTextPrefab, rainArea);
         spawnedNumbers.Add(obj);
@@ -200,26 +236,14 @@ public class CodeRainPuzzle : MonoBehaviour
             text.fontSize = 38;
         }
 
-        RectTransform inputRT = codeInputs[index].GetComponent<RectTransform>();
-
-        // ✅ 把 InputField 的世界坐标转换成 RainArea 里的局部坐标
-        Vector3 inputWorldPos = inputRT.TransformPoint(inputRT.rect.center);
-
-        Vector2 localPoint;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            rainArea,
-            RectTransformUtility.WorldToScreenPoint(null, inputWorldPos),
-            null,
-            out localPoint
-        );
-
-        float targetX = localPoint.x + Random.Range(-targetXRandomOffset, targetXRandomOffset);
+        // 红色线索数字直接在输入框上方范围随机降落
+        float areaWidth = rainArea.rect.width;
+        float targetX = Random.Range(-areaWidth / 3f, areaWidth / 3f);
 
         float areaHeight = rainArea.rect.height;
         float spawnY = areaHeight / 2f + 30f;
 
-        if (rt != null)
-            rt.anchoredPosition = new Vector2(targetX, spawnY);
+        if (rt != null) rt.anchoredPosition = new Vector2(targetX, spawnY);
 
         StartCoroutine(FallRoutine(obj, targetFallSpeed));
         StartCoroutine(TargetFadeRoutine(text));
@@ -235,7 +259,6 @@ public class CodeRainPuzzle : MonoBehaviour
         while (obj != null && rt.anchoredPosition.y > bottomY)
         {
             if (!isRunning) yield break;
-
             rt.anchoredPosition += Vector2.down * speed * Time.deltaTime;
             yield return null;
         }
@@ -250,7 +273,6 @@ public class CodeRainPuzzle : MonoBehaviour
     IEnumerator TargetFadeRoutine(TextMeshProUGUI text)
     {
         if (text == null) yield break;
-
         while (isRunning && text != null)
         {
             yield return FadeAlpha(text, 1f, 0.25f, 0.45f);
@@ -261,109 +283,24 @@ public class CodeRainPuzzle : MonoBehaviour
     IEnumerator FadeAlpha(TextMeshProUGUI text, float from, float to, float duration)
     {
         if (text == null) yield break;
-
         float time = 0f;
         Color c = text.color;
-
         while (time < duration)
         {
             time += Time.deltaTime;
-            float t = time / duration;
-
-            c.a = Mathf.Lerp(from, to, t);
+            c.a = Mathf.Lerp(from, to, time / duration);
             text.color = c;
-
             yield return null;
         }
-
-        c.a = to;
-        text.color = c;
     }
 
-    void OnInputChanged(int index, string value)
+    void ClearOldNumbers()
     {
-        if (!isRunning || puzzleCompleted) return;
-        if (codeInputs[index] == null) return;
-
-        if (value.Length > 1)
+        foreach (GameObject obj in spawnedNumbers)
         {
-            value = value.Substring(value.Length - 1, 1);
-            codeInputs[index].text = value;
+            if (obj != null) Destroy(obj);
         }
-
-        if (value.Length == 1)
-        {
-            if (index < codeInputs.Length - 1)
-            {
-                FocusInput(index + 1);
-            }
-        }
-
-        CheckInputAuto();
-    }
-
-    void HandleBackspace()
-    {
-        if (!Input.GetKeyDown(KeyCode.Backspace)) return;
-        if (codeInputs == null) return;
-
-        int activeIndex = GetActiveInputIndex();
-
-        if (activeIndex <= 0) return;
-
-        if (codeInputs[activeIndex] != null && string.IsNullOrEmpty(codeInputs[activeIndex].text))
-        {
-            FocusInput(activeIndex - 1);
-            codeInputs[activeIndex - 1].text = "";
-        }
-    }
-
-    int GetActiveInputIndex()
-    {
-        for (int i = 0; i < codeInputs.Length; i++)
-        {
-            if (codeInputs[i] != null && codeInputs[i].isFocused)
-                return i;
-        }
-
-        return -1;
-    }
-
-    void FocusInput(int index)
-    {
-        if (codeInputs == null) return;
-        if (index < 0 || index >= codeInputs.Length) return;
-        if (codeInputs[index] == null) return;
-
-        codeInputs[index].Select();
-        codeInputs[index].ActivateInputField();
-    }
-
-    void CheckInputAuto()
-    {
-        string result = "";
-
-        foreach (TMP_InputField input in codeInputs)
-        {
-            if (input != null)
-                result += input.text.Trim();
-        }
-
-        if (result.Length < targetCode.Length)
-            return;
-
-        if (result == targetCode)
-        {
-            StartCoroutine(SuccessRoutine());
-        }
-        else
-        {
-            if (feedbackText != null)
-            {
-                feedbackText.text = "验证码顺序错误。";
-                feedbackText.color = Color.red;
-            }
-        }
+        spawnedNumbers.Clear();
     }
 
     IEnumerator SuccessRoutine()
@@ -371,11 +308,9 @@ public class CodeRainPuzzle : MonoBehaviour
         puzzleCompleted = true;
         isRunning = false;
 
-        if (normalRainCoroutine != null)
-            StopCoroutine(normalRainCoroutine);
-
-        if (targetRainCoroutine != null)
-            StopCoroutine(targetRainCoroutine);
+        if (normalRainCoroutine != null) StopCoroutine(normalRainCoroutine);
+        if (targetRainCoroutine != null) StopCoroutine(targetRainCoroutine);
+        if (cursorBlinkCoroutine != null) StopCoroutine(cursorBlinkCoroutine);
 
         if (feedbackText != null)
         {
@@ -385,12 +320,9 @@ public class CodeRainPuzzle : MonoBehaviour
 
         yield return new WaitForSeconds(successDelay);
 
-        if (codeRainPanel != null)
-            codeRainPanel.SetActive(false);
-
+        if (codeRainPanel != null) codeRainPanel.SetActive(false);
         ClearOldNumbers();
 
-        if (uiMazeController != null)
-            uiMazeController.StartMaze();
+        if (uiMazeController != null) uiMazeController.StartMaze();
     }
 }
