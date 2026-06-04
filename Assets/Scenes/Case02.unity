@@ -8570,7 +8570,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &708930902
 RectTransform:
   m_ObjectHideFlags: 0
@@ -11543,10 +11543,10 @@ RectTransform:
   - {fileID: 1158980116}
   m_Father: {fileID: 214050737}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 625.9337, y: -72.875244}
+  m_SizeDelta: {x: 150, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &910024609
 MonoBehaviour:
@@ -15574,8 +15574,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -558, y: 413}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchoredPosition: {x: -535, y: 422}
+  m_SizeDelta: {x: 115.8953, y: 116.7474}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1187604905
 MonoBehaviour:
@@ -15661,14 +15661,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.31359026, g: 0.43842068, b: 0.8207547, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: d90dcc40885dcf8489b5cef5b89ef1da, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -26709,6 +26709,8 @@ MonoBehaviour:
     scoreGain: 5
   wordStops: []
   waitingForMaze: 0
+  enableCase03Pressure: 0
+  case03ChoicePressure: {fileID: 0}
 --- !u!4 &2129102361
 Transform:
   m_ObjectHideFlags: 0
