@@ -35,6 +35,8 @@ public class DialogueEventRouter : MonoBehaviour
 
     public void OnConversationLine(Subtitle subtitle)
     {
+        Debug.Log("Router  ’µΩÃ®¥ £∫" + subtitle.formattedText.text);
+
         if (currentMode == DialogueRouteMode.Chat)
         {
             if (chatBridge != null)

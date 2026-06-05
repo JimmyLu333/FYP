@@ -104,6 +104,21 @@ public class DialogueChatBridge : MonoBehaviour
 
         ClearOldChoices();
 
+        StartCoroutine(StartConversationNextFrame(conversationTitle));
+    }
+
+    private IEnumerator StartConversationNextFrame(string conversationTitle)
+    {
+        if (DialogueManager.isConversationActive)
+        {
+            DialogueManager.StopConversation();
+
+            yield return null;
+            yield return null;
+        }
+
+        Debug.Log("准备启动对话：" + conversationTitle);
+
         DialogueManager.StartConversation(conversationTitle);
     }
 
@@ -116,6 +131,8 @@ public class DialogueChatBridge : MonoBehaviour
 
     public void OnConversationLine(Subtitle subtitle)
     {
+        Debug.Log("ChatBridge 收到台词：" + subtitle.formattedText.text);
+
         if (subtitle == null) return;
 
         string speakerName = subtitle.speakerInfo.Name;
@@ -324,5 +341,21 @@ public class DialogueChatBridge : MonoBehaviour
         }
 
         return 0;
+    }
+
+    public void ResetChatStateOnly()
+    {
+        waitingForMaze = false;
+        currentResponses = null;
+        pendingResponses = null;
+        suppressNextPlayerLine = false;
+
+        HideChoiceButtons();
+
+        if (chatPanel != null)
+            chatPanel.SetActive(false);
+
+        if (chatUIManager != null)
+            chatUIManager.ClearChat();
     }
 }
