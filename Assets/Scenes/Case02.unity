@@ -9033,12 +9033,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 725148692}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8c1037e3e53c5044987a153fb7ad48e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   app4Button: {fileID: 1187604906}
+  unlockVariableName: UnlockPhoneApp
 --- !u!4 &725148694
 Transform:
   m_ObjectHideFlags: 0
@@ -12189,6 +12190,7 @@ GameObject:
   - component: {fileID: 933442487}
   - component: {fileID: 933442489}
   - component: {fileID: 933442488}
+  - component: {fileID: 933442490}
   m_Layer: 5
   m_Name: TopBar
   m_TagString: Untagged
@@ -12255,6 +12257,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 933442486}
   m_CullTransparentMesh: 1
+--- !u!114 &933442490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 933442486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 725c36cfbc86d504688b0e20c522ebeb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  windowToDrag: {fileID: 708930902}
 --- !u!1 &933743522
 GameObject:
   m_ObjectHideFlags: 0
@@ -17323,7 +17338,7 @@ MonoBehaviour:
   phoneInputField: {fileID: 1394436117}
   feedbackText: {fileID: 430880300}
   confirmButton: {fileID: 807309170}
-  correctPhoneNumber: 1
+  correctPhoneNumber: 13808642485
   dialogueChatBridge: {fileID: 2129102360}
   conversationName: Case02
   closeButton: {fileID: 251132357}
@@ -20889,51 +20904,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1545089939}
   m_CullTransparentMesh: 1
---- !u!1 &1556867759
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1556867761}
-  - component: {fileID: 1556867760}
-  m_Layer: 0
-  m_Name: DialogueSystemHardReset
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1556867760
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1556867759}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 229102420388a6f4ca64153383b95919, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  resetOnStart: 1
---- !u!4 &1556867761
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1556867759}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 439.13742, y: 321.2209, z: 3.5276914}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1572535346
 GameObject:
   m_ObjectHideFlags: 0
@@ -24617,7 +24587,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1944999773}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 545042ad7d5756a469e5e7d5d0585bb0, type: 3}
   m_Name: 
@@ -26613,7 +26583,6 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 985597267}
-  - {fileID: 1556867761}
   - {fileID: 1944999775}
   - {fileID: 1722027423}
   - {fileID: 2033669422}

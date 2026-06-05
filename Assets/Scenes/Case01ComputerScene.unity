@@ -8178,7 +8178,7 @@ MonoBehaviour:
   codeAppButton: {fileID: 571415868}
   confirmButton: {fileID: 1440279660}
   closeButton: {fileID: 1445437646}
-  correctCode: 1
+  correctCode: 025250
   uiMazeController: {fileID: 1680596364}
 --- !u!4 &799508475
 Transform:
@@ -13704,7 +13704,7 @@ MonoBehaviour:
   phoneInputField: {fileID: 1394436117}
   feedbackText: {fileID: 430880300}
   confirmButton: {fileID: 807309170}
-  correctPhoneNumber: 1
+  correctPhoneNumber: 13228865437
   dialogueChatBridge: {fileID: 2129102360}
   conversationName: Case01Chat
   closeButton: {fileID: 251132357}
