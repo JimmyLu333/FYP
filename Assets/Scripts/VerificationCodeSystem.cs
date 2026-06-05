@@ -30,14 +30,17 @@ public class VerificationCodeSystem : MonoBehaviour
         if (feedbackText != null)
             feedbackText.text = "";
 
+        if (codeAppButton != null)
+        {
+            codeAppButton.interactable = true;
+            codeAppButton.onClick.AddListener(OpenCodePanel);
+        }
+
         if (confirmButton != null)
             confirmButton.onClick.AddListener(CheckCode);
 
         if (closeButton != null)
             closeButton.onClick.AddListener(CloseCodePanel);
-
-        if (codeAppButton != null)
-            codeAppButton.onClick.AddListener(OpenCodePanel);
     }
 
     public void OpenCodePanel()
@@ -53,6 +56,7 @@ public class VerificationCodeSystem : MonoBehaviour
         if (feedbackText != null)
             feedbackText.text = "";
 
+        // 只是防止重复点击打开
         if (codeAppButton != null)
             codeAppButton.interactable = false;
     }
@@ -62,6 +66,13 @@ public class VerificationCodeSystem : MonoBehaviour
         if (codeInputPanel != null)
             codeInputPanel.SetActive(false);
 
+        if (codeInputField != null)
+            codeInputField.text = "";
+
+        if (feedbackText != null)
+            feedbackText.text = "";
+
+        // 没输入正确前，关闭后恢复图标
         if (!codeCompleted && codeAppButton != null)
             codeAppButton.interactable = true;
     }
@@ -79,6 +90,7 @@ public class VerificationCodeSystem : MonoBehaviour
             if (codeInputPanel != null)
                 codeInputPanel.SetActive(false);
 
+            // 只有正确后才永久锁
             if (codeAppButton != null)
                 codeAppButton.interactable = false;
 

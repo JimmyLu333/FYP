@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using PixelCrushers.DialogueSystem;
 
 public class MenuManager : MonoBehaviour
@@ -28,7 +27,7 @@ public class MenuManager : MonoBehaviour
             Destroy(manager.gameObject);
         }
 
-        SceneManager.LoadScene("Beganing scenes");
+        FadeManager.Instance.LoadSceneWithFade("Beganing scenes");
     }
 
     public void ExitGame()

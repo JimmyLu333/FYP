@@ -20,4 +20,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/BeginningCG.unity
     guid: da2f53d9fb228e74fa17c8a51488dcea
+  - enabled: 1
+    path: Assets/Scenes/SceneKK.unity
+    guid: dbc0c3838342ffd4aacb036e5c10b049
+  - enabled: 1
+    path: Assets/Scenes/Case01ComputerScene.unity
+    guid: b3a72e02a6e94aa4b82fbfb7c1be1ebc
   m_configObjects: {}
