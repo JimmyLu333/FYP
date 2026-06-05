@@ -6814,7 +6814,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -811, y: -174}
+  m_AnchoredPosition: {x: 784, y: 103}
   m_SizeDelta: {x: 152.38, y: 152.3819}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &571415866
@@ -15110,7 +15110,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.4269104, y: 0}
+  m_AnchoredPosition: {x: 0.42687988, y: 0}
   m_SizeDelta: {x: 1098.8276, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1158980117
@@ -22205,110 +22205,10 @@ MonoBehaviour:
   goal: {fileID: 1267614324}
   walls:
   - {fileID: 1826235103}
-  - {fileID: 987873465}
-  - {fileID: 161562346}
-  - {fileID: 1542928181}
-  - {fileID: 628347446}
-  - {fileID: 357876970}
-  - {fileID: 1534144166}
-  - {fileID: 1663281957}
-  - {fileID: 1372339046}
-  - {fileID: 1019108025}
-  - {fileID: 712131351}
-  - {fileID: 866140096}
-  - {fileID: 2048061860}
-  - {fileID: 1307272759}
-  - {fileID: 465584509}
-  - {fileID: 766286565}
-  - {fileID: 1531809913}
-  - {fileID: 1719009644}
-  - {fileID: 1748753466}
-  - {fileID: 1986006756}
-  - {fileID: 2019081175}
-  - {fileID: 1205412679}
-  - {fileID: 1900933408}
-  - {fileID: 844602419}
-  - {fileID: 1603012166}
-  - {fileID: 114695839}
-  - {fileID: 990845654}
-  - {fileID: 885731234}
-  - {fileID: 123456283}
-  - {fileID: 1235132254}
-  - {fileID: 1281355656}
-  - {fileID: 473581091}
-  - {fileID: 1735127114}
-  - {fileID: 896600963}
-  - {fileID: 327710654}
-  - {fileID: 170799239}
-  - {fileID: 1197651281}
-  - {fileID: 537975280}
-  - {fileID: 666358040}
-  - {fileID: 1751428263}
-  - {fileID: 947645905}
-  - {fileID: 247544867}
-  - {fileID: 1019110482}
-  - {fileID: 1409325537}
-  - {fileID: 1299151975}
-  - {fileID: 1675244263}
-  - {fileID: 425603329}
-  - {fileID: 627544626}
-  - {fileID: 416733619}
-  - {fileID: 89126436}
-  - {fileID: 441764400}
-  - {fileID: 1751821534}
   - {fileID: 1985914776}
   - {fileID: 1331253985}
   - {fileID: 752952797}
-  - {fileID: 1545089940}
   - {fileID: 1100727278}
-  - {fileID: 1643280329}
-  - {fileID: 26655248}
-  - {fileID: 1089191596}
-  - {fileID: 893563259}
-  - {fileID: 231586093}
-  - {fileID: 108587162}
-  - {fileID: 2096178621}
-  - {fileID: 897693394}
-  - {fileID: 965105414}
-  - {fileID: 92271003}
-  - {fileID: 479900770}
-  - {fileID: 363017498}
-  - {fileID: 1201630020}
-  - {fileID: 1277868739}
-  - {fileID: 2012204032}
-  - {fileID: 669949954}
-  - {fileID: 1149892323}
-  - {fileID: 1068538322}
-  - {fileID: 1382041134}
-  - {fileID: 1331006009}
-  - {fileID: 1968296560}
-  - {fileID: 821799129}
-  - {fileID: 1053060483}
-  - {fileID: 1220427798}
-  - {fileID: 1471306668}
-  - {fileID: 1500179298}
-  - {fileID: 432924713}
-  - {fileID: 360796747}
-  - {fileID: 1597652363}
-  - {fileID: 975130376}
-  - {fileID: 629483691}
-  - {fileID: 181933347}
-  - {fileID: 1051422076}
-  - {fileID: 779497068}
-  - {fileID: 1052911134}
-  - {fileID: 8816677}
-  - {fileID: 223585238}
-  - {fileID: 1421382550}
-  - {fileID: 1394453742}
-  - {fileID: 1149844010}
-  - {fileID: 1513123936}
-  - {fileID: 1343940381}
-  - {fileID: 1508494681}
-  - {fileID: 277989063}
-  - {fileID: 1410061694}
-  - {fileID: 933743523}
-  - {fileID: 1307609125}
-  - {fileID: 1909444758}
   - {fileID: 585092460}
   timerText: {fileID: 2060559625}
   resultText: {fileID: 288379220}
@@ -22321,6 +22221,9 @@ MonoBehaviour:
   ballCollisionScale: 0.4
   dialogueChatBridge: {fileID: 2129102360}
   mazeFadeSceneTransition: {fileID: 1480483122}
+  restartSceneOnFail: 1
+  restartDelay: 2
+  cleanDialogueSystemBeforeRestart: 1
 --- !u!4 &1680596365
 Transform:
   m_ObjectHideFlags: 0

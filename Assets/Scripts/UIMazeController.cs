@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using TMPro;
 using System.Collections;
+using UnityEngine.SceneManagement;
+using PixelCrushers.DialogueSystem;
 
 public class UIMazeController : MonoBehaviour
 {
@@ -22,7 +24,7 @@ public class UIMazeController : MonoBehaviour
     public string successMessage = "破解成功！到账 ¥800,000";
 
     [TextArea(2, 5)]
-    public string failMessage = "时间耗尽，破解失败。";
+    public string failMessage = "连接超时，正在重新尝试...";
 
     [Header("设置")]
     public float moveSpeed = 250f;
@@ -42,10 +44,16 @@ public class UIMazeController : MonoBehaviour
     [Header("可选：迷宫成功后转场")]
     public MazeFadeSceneTransition mazeFadeSceneTransition;
 
+    [Header("失败后重开")]
+    public bool restartSceneOnFail = true;
+    public float restartDelay = 2f;
+    public bool cleanDialogueSystemBeforeRestart = true;
+
     private float currentTime;
     private bool isPlaying;
     private Vector2 ballStartPos;
     private Coroutine closeCoroutine;
+    private Coroutine restartCoroutine;
 
     void Start()
     {
@@ -73,6 +81,12 @@ public class UIMazeController : MonoBehaviour
         {
             StopCoroutine(closeCoroutine);
             closeCoroutine = null;
+        }
+
+        if (restartCoroutine != null)
+        {
+            StopCoroutine(restartCoroutine);
+            restartCoroutine = null;
         }
 
         if (mazeWindowPanel != null)
@@ -220,5 +234,40 @@ public class UIMazeController : MonoBehaviour
 
         if (resultText != null)
             resultText.text = failMessage;
+
+        if (restartSceneOnFail)
+            restartCoroutine = StartCoroutine(RestartSceneRoutine());
+    }
+
+    IEnumerator RestartSceneRoutine()
+    {
+        yield return new WaitForSeconds(restartDelay);
+
+        if (cleanDialogueSystemBeforeRestart)
+        {
+            if (DialogueManager.isConversationActive)
+            {
+                Debug.Log("UIMazeController: 重启前停止 Dialogue Conversation");
+                DialogueManager.StopConversation();
+            }
+
+            DialogueSystemController[] oldManagers =
+                FindObjectsOfType<DialogueSystemController>(true);
+
+            foreach (DialogueSystemController manager in oldManagers)
+            {
+                Debug.Log("UIMazeController: 重启前删除 Dialogue Manager - " + manager.name);
+                Destroy(manager.gameObject);
+            }
+
+            yield return null;
+        }
+
+        string currentSceneName = SceneManager.GetActiveScene().name;
+
+        if (FadeManager.Instance != null)
+            FadeManager.Instance.LoadSceneWithFade(currentSceneName);
+        else
+            SceneManager.LoadScene(currentSceneName);
     }
 }

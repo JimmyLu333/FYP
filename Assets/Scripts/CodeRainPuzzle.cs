@@ -64,6 +64,19 @@ public class CodeRainPuzzle : MonoBehaviour
         SetupMasterInput();
     }
 
+    void Update()
+    {
+        if (!isRunning || puzzleCompleted) return;
+
+        if (masterInputField == null) return;
+
+        if (!masterInputField.isFocused)
+        {
+            masterInputField.Select();
+            masterInputField.ActivateInputField();
+        }
+    }
+
     void SetupMasterInput()
     {
         if (masterInputField == null) return;
