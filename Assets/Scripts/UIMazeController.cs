@@ -180,7 +180,7 @@ public class UIMazeController : MonoBehaviour
         isPlaying = false;
 
         if (resultText != null)
-            resultText.text = "破解成功！到账 ¥50,000";
+            resultText.text = "破解成功！到账 ¥800,000";
 
         closeCoroutine = StartCoroutine(CloseAfterSuccess());
     }

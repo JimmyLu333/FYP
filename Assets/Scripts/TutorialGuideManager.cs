@@ -4,35 +4,22 @@ using System.Collections;
 
 public class TutorialGuideManager : MonoBehaviour
 {
-    [Header("指引箭头")]
     public RectTransform guideArrow;
-
-    [Header("要指引的按钮")]
     public RectTransform informationButton;
     public RectTransform chatButton;
-
-    [Header("底部提示对话")]
     public SimpleStoryDialogueManager storyDialogueManager;
-
-    [Header("箭头偏移")]
     public Vector2 arrowOffset = new Vector2(80f, 40f);
-
-    [Header("第二句自动隐藏")]
     public float chatGuideHideDelay = 3f;
 
     private int guideStep = 0;
+    private bool guideStarted = false;
+    private bool guideFinished = false;
     private Coroutine hideCoroutine;
 
-    [Header("提示文本")]
     public string informationSpeaker = "系统提示";
-
-    [TextArea(2, 4)]
-    public string informationGuideText = "请先点击 Information，查看目标资料。";
-
+    [TextArea(2, 4)] public string informationGuideText = "请先点击 Information，查看目标资料。";
     public string chatSpeaker = "系统提示";
-
-    [TextArea(2, 4)]
-    public string chatGuideText = "资料已经确认。现在点击 Chat，开始联系目标。";
+    [TextArea(2, 4)] public string chatGuideText = "资料已经确认。现在点击 Chat，开始联系目标。";
 
     void Start()
     {
@@ -42,6 +29,9 @@ public class TutorialGuideManager : MonoBehaviour
 
     public void StartGuide()
     {
+        if (guideStarted || guideFinished) return;
+
+        guideStarted = true;
         guideStep = 1;
         ShowInformationGuide();
     }
@@ -51,12 +41,7 @@ public class TutorialGuideManager : MonoBehaviour
         MoveArrowTo(informationButton);
 
         if (storyDialogueManager != null)
-        {
-            storyDialogueManager.SetSingleLine(
-                informationSpeaker,
-                informationGuideText
-            );
-        }
+            storyDialogueManager.SetSingleLine(informationSpeaker, informationGuideText);
     }
 
     void ShowChatGuide()
@@ -64,12 +49,7 @@ public class TutorialGuideManager : MonoBehaviour
         MoveArrowTo(chatButton);
 
         if (storyDialogueManager != null)
-        {
-            storyDialogueManager.SetSingleLine(
-                chatSpeaker,
-                chatGuideText
-            );
-        }
+            storyDialogueManager.SetSingleLine(chatSpeaker, chatGuideText);
 
         if (hideCoroutine != null)
             StopCoroutine(hideCoroutine);
@@ -106,6 +86,7 @@ public class TutorialGuideManager : MonoBehaviour
         if (guideStep != 2) return;
 
         guideStep = 3;
+        guideFinished = true;
 
         if (hideCoroutine != null)
             StopCoroutine(hideCoroutine);

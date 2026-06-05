@@ -2652,8 +2652,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 165.96568
-        y: 118.66972
+        x: 145.523
+        y: 120.30907
         width: 160
         height: 30
     - id: 2
@@ -4863,7 +4863,7 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 1556.7354
+        x: 1555.6365
         y: 459.98386
         width: 160
         height: 30
@@ -5379,7 +5379,7 @@ MonoBehaviour:
         type: 0
         typeString: 
       - title: Dialogue Text
-        value: "\u5230\u90A3\u65F6\u5019\uFF0C\u5C31\u7B97\u60A8\u62FF\u4E00\u5343\u4E07\u6765\uFF0C\u4E5F\u6CA1\u4EBA\u6562\u4E0A\u624B\u672F\u53F0\u4E86\u3002\r\u60A8\u73B0\u5728\u6BCF\u4E00\u79D2\u949F\u7684\u72B9\u8C6B\uFF0C\u90FD\u5728\u8BA9\u4ED6\u7684\u5927\u8111\u591A\u6B7B\u4E00\u7247\u7EC6\u80DE\u3002"
+        value: "\u5230\u54EA\u65F6\u5019\uFF0C\u5C31\u7B97\u60A8\u62FF\u4E00\u5343\u4E07\u6765\uFF0C\u4E5F\u6CA1\u4EBA\u6562\u4E0A\u624B\u672F\u53F0\u4E86\u3002\u60A8\u73B0\u5728\u6BCF\u4E00\u79D2\u7684\u72B9\u8C6B\uFF0C\u90FD\u5728\u8BA9\u60A8\u5B59\u513F\u7684\u5927\u8111\u591A\u6B7B\u4E00\u7247\u7EC6\u80DE\u554A\u3002"
         type: 0
         typeString: 
       - title: Sequence
@@ -5412,8 +5412,8 @@ MonoBehaviour:
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 0, y: 17.330935}
-    canvasZoom: 0.5800004
+    canvasScrollPosition: {x: 0, y: 0}
+    canvasZoom: 0.6100004
   - id: 3
     fields:
     - title: Title
