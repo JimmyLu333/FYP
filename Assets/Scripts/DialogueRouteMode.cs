@@ -21,6 +21,7 @@ public class DialogueEventRouter : MonoBehaviour
     [Header("Case02 电话App解锁")]
     public Case02PhoneAppUnlocker case02PhoneAppUnlocker;
 
+
     public void SetChatMode()
     {
         currentMode = DialogueRouteMode.Chat;
@@ -35,6 +36,8 @@ public class DialogueEventRouter : MonoBehaviour
 
     public void OnConversationLine(Subtitle subtitle)
     {
+        Debug.Log("Router 收到台词：" + subtitle.formattedText.text);
+
         if (currentMode == DialogueRouteMode.Chat)
         {
             if (chatBridge != null)
@@ -65,9 +68,15 @@ public class DialogueEventRouter : MonoBehaviour
     {
         if (currentMode == DialogueRouteMode.Chat)
         {
-            // Case02 第一段 Chat 结束后，解锁电话 App4
             if (case02PhoneAppUnlocker != null)
+            {
                 case02PhoneAppUnlocker.UnlockApp4();
+                Debug.Log("Case02 Chat结束，解锁 App4");
+            }
+            else
+            {
+                Debug.LogWarning("Case02PhoneAppUnlocker 没有绑定！");
+            }
         }
         else if (currentMode == DialogueRouteMode.Phone)
         {
