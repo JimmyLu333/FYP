@@ -314,6 +314,20 @@ MonoBehaviour:
       value: 
       type: 0
       typeString: 
+  - id: 5
+    fields:
+    - title: Name
+      value: StartCase01End
+      type: 0
+      typeString: 
+    - title: Initial Value
+      value: False
+      type: 2
+      typeString: CustomFieldType_Boolean
+    - title: Description
+      value: 
+      type: 0
+      typeString: 
   conversations:
   - id: 1
     fields:
@@ -3727,8 +3741,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 596.5402
-        y: 754.33636
+        x: 593.80054
+        y: 755.7062
         width: 160
         height: 30
     - id: 21
@@ -5346,13 +5360,13 @@ MonoBehaviour:
       conditionPriority: 2
       outgoingLinks: []
       conditionsString: 
-      userScript: 
+      userScript: Variable["StartCase01End"] = true
       onExecute:
         m_PersistentCalls:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 1554.1295
+        x: 1551.6295
         y: 1367.1012
         width: 160
         height: 30
@@ -5412,8 +5426,8 @@ MonoBehaviour:
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 0, y: 0}
-    canvasZoom: 0.6100004
+    canvasScrollPosition: {x: 582.14185, y: 110.71411}
+    canvasZoom: 0.28000045
   - id: 3
     fields:
     - title: Title
@@ -5678,7 +5692,7 @@ MonoBehaviour:
       canvasRect:
         serializedVersion: 2
         x: 159.74472
-        y: 290.74466
+        y: 292.41132
         width: 160
         height: 30
     - id: 4
@@ -5909,7 +5923,7 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 344.03772
+        x: 342.8883
         y: 506.04706
         width: 160
         height: 30
@@ -6806,8 +6820,8 @@ MonoBehaviour:
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 61.666656, y: 5}
-    canvasZoom: 0.60000014
+    canvasScrollPosition: {x: 259.44913, y: 223.07695}
+    canvasZoom: 0.78
   - id: 4
     fields:
     - title: Title
@@ -7187,7 +7201,7 @@ MonoBehaviour:
         height: 30
     entryGroups: []
     canvasScrollPosition: {x: 0, y: 0}
-    canvasZoom: 0.8800001
+    canvasZoom: 0.7900002
   - id: 5
     fields:
     - title: Title
