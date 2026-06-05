@@ -2226,7 +2226,7 @@ MonoBehaviour:
   m_text: "\u9648\u9ED8"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 333f9fcd57cab78418dd44ec0b7991ff, type: 2}
-  m_sharedMaterial: {fileID: -5205067653130460212, guid: 333f9fcd57cab78418dd44ec0b7991ff, type: 2}
+  m_sharedMaterial: {fileID: -9195448257979433617, guid: 333f9fcd57cab78418dd44ec0b7991ff, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -5312,8 +5312,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 229.3, y: -0.9350014}
-  m_SizeDelta: {x: 221.3723, y: 51.87}
+  m_AnchoredPosition: {x: 206.94574, y: -0.9349899}
+  m_SizeDelta: {x: 213.8839, y: 51.87}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &458272619
 MonoBehaviour:
@@ -5338,7 +5338,7 @@ MonoBehaviour:
   m_text: "\u8BC8\u9A97\u8FDB\u5EA6 : 0%"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 333f9fcd57cab78418dd44ec0b7991ff, type: 2}
-  m_sharedMaterial: {fileID: -5205067653130460212, guid: 333f9fcd57cab78418dd44ec0b7991ff, type: 2}
+  m_sharedMaterial: {fileID: -9195448257979433617, guid: 333f9fcd57cab78418dd44ec0b7991ff, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -5362,8 +5362,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 20
+  m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -5780,7 +5780,7 @@ MonoBehaviour:
   m_text: "\u4F60\u662F\u8C01"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 333f9fcd57cab78418dd44ec0b7991ff, type: 2}
-  m_sharedMaterial: {fileID: -5205067653130460212, guid: 333f9fcd57cab78418dd44ec0b7991ff, type: 2}
+  m_sharedMaterial: {fileID: -9195448257979433617, guid: 333f9fcd57cab78418dd44ec0b7991ff, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -10537,7 +10537,7 @@ MonoBehaviour:
   m_text: "\u6211\u8BB0\u5F97\u4F60"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 333f9fcd57cab78418dd44ec0b7991ff, type: 2}
-  m_sharedMaterial: {fileID: -5205067653130460212, guid: 333f9fcd57cab78418dd44ec0b7991ff, type: 2}
+  m_sharedMaterial: {fileID: -9195448257979433617, guid: 333f9fcd57cab78418dd44ec0b7991ff, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -26536,8 +26536,8 @@ MonoBehaviour:
   displayNameForAutoActor: "\u9648\u5B9E"
   npcReplyDelay: 1.2
   scamRateText: {fileID: 352817131}
-  currentScamRate: 0
   maxScamRate: 100
+  resetScamRateOnStart: 1
   choiceScoreRules:
   - choiceText: "\u6211\u662F\u9999\u6E2F\u56FD\u9645\u673A\u573A\u6D77\u5173\u65C5\u68C0\u5904\u7684\u3002\u4F60\u73B0\u5728\u65B9\u4FBF\u8BF4\u8BDD\u5417\uFF1F\u6211\u4EEC\u6709\u4E00\u4E2A\u7D27\u6025\u60C5\u51B5\u9700\u8981\u8DDF\u4F60\u6838\u5B9E\u3002"
     scoreGain: 5
