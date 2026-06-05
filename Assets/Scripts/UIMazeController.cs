@@ -17,6 +17,13 @@ public class UIMazeController : MonoBehaviour
     public TextMeshProUGUI timerText;
     public TextMeshProUGUI resultText;
 
+    [Header("结果文本")]
+    [TextArea(2, 5)]
+    public string successMessage = "破解成功！到账 ¥800,000";
+
+    [TextArea(2, 5)]
+    public string failMessage = "时间耗尽，破解失败。";
+
     [Header("设置")]
     public float moveSpeed = 250f;
     public float timeLimit = 60f;
@@ -31,6 +38,9 @@ public class UIMazeController : MonoBehaviour
 
     [Header("聊天系统")]
     public DialogueChatBridge dialogueChatBridge;
+
+    [Header("可选：迷宫成功后转场")]
+    public MazeFadeSceneTransition mazeFadeSceneTransition;
 
     private float currentTime;
     private bool isPlaying;
@@ -180,7 +190,7 @@ public class UIMazeController : MonoBehaviour
         isPlaying = false;
 
         if (resultText != null)
-            resultText.text = "破解成功！到账 ¥800,000";
+            resultText.text = successMessage;
 
         closeCoroutine = StartCoroutine(CloseAfterSuccess());
     }
@@ -191,6 +201,12 @@ public class UIMazeController : MonoBehaviour
 
         if (mazeWindowPanel != null)
             mazeWindowPanel.SetActive(false);
+
+        if (mazeFadeSceneTransition != null)
+        {
+            mazeFadeSceneTransition.TriggerTransition();
+            yield break;
+        }
 
         if (dialogueChatBridge != null)
             dialogueChatBridge.ContinueAfterMaze();
@@ -203,6 +219,6 @@ public class UIMazeController : MonoBehaviour
         isPlaying = false;
 
         if (resultText != null)
-            resultText.text = "时间耗尽，破解失败。";
+            resultText.text = failMessage;
     }
 }

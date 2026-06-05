@@ -17,6 +17,23 @@ public class VideoEndHandler : MonoBehaviour
 
     void OnVideoEnd(VideoPlayer vp)
     {
-        SceneManager.LoadScene(nextSceneName);
+        if (FadeManager.Instance != null)
+        {
+            FadeManager.Instance.LoadSceneWithFade(nextSceneName);
+        }
+        else
+        {
+            Debug.LogWarning("FadeManager 不存在，直接切场景");
+
+            SceneManager.LoadScene(nextSceneName);
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (videoPlayer != null)
+        {
+            videoPlayer.loopPointReached -= OnVideoEnd;
+        }
     }
 }
