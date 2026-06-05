@@ -13,19 +13,28 @@ public class ChatUIManager : MonoBehaviour
     [Header("滚动区域")]
     public ScrollRect scrollRect;
 
+    public void ClearChat()
+    {
+        if (contentRoot == null) return;
+
+        for (int i = contentRoot.childCount - 1; i >= 0; i--)
+        {
+            Destroy(contentRoot.GetChild(i).gameObject);
+        }
+
+        Canvas.ForceUpdateCanvases();
+        ScrollToBottom();
+    }
+
     public void AddLeftMessage(string speakerName, string message)
     {
         GameObject bubble = Instantiate(leftBubblePrefab, contentRoot);
 
         LeftBubbleUI bubbleUI = bubble.GetComponent<LeftBubbleUI>();
         if (bubbleUI != null)
-        {
             bubbleUI.SetData(speakerName, message);
-        }
         else
-        {
             Debug.LogError("LeftBubble prefab 上没有 LeftBubbleUI 组件！");
-        }
 
         Canvas.ForceUpdateCanvases();
         ScrollToBottom();
@@ -37,13 +46,9 @@ public class ChatUIManager : MonoBehaviour
 
         RightBubbleUI bubbleUI = bubble.GetComponent<RightBubbleUI>();
         if (bubbleUI != null)
-        {
             bubbleUI.SetData(speakerName, message);
-        }
         else
-        {
             Debug.LogError("RightBubble prefab 上没有 RightBubbleUI 组件！");
-        }
 
         Canvas.ForceUpdateCanvases();
         ScrollToBottom();
@@ -52,8 +57,6 @@ public class ChatUIManager : MonoBehaviour
     public void ScrollToBottom()
     {
         if (scrollRect != null)
-        {
             scrollRect.verticalNormalizedPosition = 0f;
-        }
     }
 }

@@ -19,14 +19,18 @@ public class DGManager : MonoBehaviour
     [Header("--- 对话数据 ---")]
     public List<DialogueLine> activeConversations = new List<DialogueLine>();
 
-    [Header("--- 三张开头背景图 ---")]
+    [Header("--- 五张开头背景图 ---")]
     public Sprite openingImage1;
     public Sprite openingImage2;
     public Sprite openingImage3;
+    public Sprite openingImage4;
+    public Sprite openingImage5;
 
     [Header("--- 第几句开始切图 ---")]
     public int switchToImage2AtLine = 2;
     public int switchToImage3AtLine = 4;
+    public int switchToImage4AtLine = 6;
+    public int switchToImage5AtLine = 8;
 
     [Header("--- UI 组件绑定 ---")]
     public Image backgroundImage;
@@ -109,6 +113,12 @@ public class DGManager : MonoBehaviour
 
     private Sprite GetSpriteForCurrentLine()
     {
+        if (currentLineIndex >= switchToImage5AtLine)
+            return openingImage5;
+
+        if (currentLineIndex >= switchToImage4AtLine)
+            return openingImage4;
+
         if (currentLineIndex >= switchToImage3AtLine)
             return openingImage3;
 
@@ -194,11 +204,15 @@ public class DGManager : MonoBehaviour
     private IEnumerator TypeText(string text)
     {
         isTyping = true;
-        contentTMP.text = "";
+
+        if (contentTMP != null)
+            contentTMP.text = "";
 
         foreach (char c in text)
         {
-            contentTMP.text += c;
+            if (contentTMP != null)
+                contentTMP.text += c;
+
             yield return new WaitForSeconds(typingSpeed);
         }
 
@@ -212,8 +226,12 @@ public class DGManager : MonoBehaviour
 
         if (isTyping)
         {
-            StopCoroutine(typingCoroutine);
-            contentTMP.text = activeConversations[currentLineIndex].dialogueText;
+            if (typingCoroutine != null)
+                StopCoroutine(typingCoroutine);
+
+            if (contentTMP != null)
+                contentTMP.text = activeConversations[currentLineIndex].dialogueText;
+
             isTyping = false;
             return;
         }
