@@ -91,16 +91,18 @@ public class DialogueChatBridge : MonoBehaviour
     {
         HideDefaultDialogueUI();
 
+        waitingForMaze = false;
+        currentResponses = null;
+        pendingResponses = null;
+        suppressNextPlayerLine = false;
+
+        if (chatUIManager != null)
+            chatUIManager.ClearChat();
+
         if (chatPanel != null)
             chatPanel.SetActive(true);
 
         ClearOldChoices();
-
-        if (nameText != null)
-            nameText.text = npcName;
-
-        if (nameText2 != null)
-            nameText2.text = npcName;
 
         DialogueManager.StartConversation(conversationTitle);
     }
