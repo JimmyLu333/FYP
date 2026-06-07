@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using PixelCrushers.DialogueSystem;
 
 public class PhoneDialSystem : MonoBehaviour
 {
@@ -15,15 +16,19 @@ public class PhoneDialSystem : MonoBehaviour
 
     [Header("聊天系统")]
     public DialogueChatBridge dialogueChatBridge;
-    public string conversationName = "Case01Chat";
+    public string conversationName = "Case02Chat";
 
     [Header("退出按钮")]
     public Button closeButton;
 
     private bool phoneVerified = false;
+    private bool conversationStarted = false;
 
     void Start()
     {
+        phoneVerified = false;
+        conversationStarted = false;
+
         if (phoneInputPanel != null)
             phoneInputPanel.SetActive(false);
 
@@ -31,18 +36,31 @@ public class PhoneDialSystem : MonoBehaviour
             feedbackText.text = "";
 
         if (confirmButton != null)
+        {
+            confirmButton.onClick.RemoveAllListeners();
             confirmButton.onClick.AddListener(CheckPhoneNumber);
+        }
 
         if (closeButton != null)
+        {
+            closeButton.onClick.RemoveAllListeners();
             closeButton.onClick.AddListener(ClosePhoneInput);
+        }
     }
 
     public void OpenPhoneInput()
     {
         if (phoneVerified)
         {
-            if (dialogueChatBridge != null && dialogueChatBridge.chatPanel != null)
-                dialogueChatBridge.chatPanel.SetActive(true);
+            if (!conversationStarted)
+            {
+                StartChatConversation();
+            }
+            else
+            {
+                if (dialogueChatBridge != null && dialogueChatBridge.chatPanel != null)
+                    dialogueChatBridge.chatPanel.SetActive(true);
+            }
 
             return;
         }
@@ -70,10 +88,7 @@ public class PhoneDialSystem : MonoBehaviour
             if (phoneInputPanel != null)
                 phoneInputPanel.SetActive(false);
 
-            if (dialogueChatBridge != null)
-                dialogueChatBridge.OpenChatAndStartConversation(conversationName);
-            else
-                Debug.LogError("DialogueChatBridge 没有绑定！");
+            StartChatConversation();
         }
         else
         {
@@ -82,6 +97,21 @@ public class PhoneDialSystem : MonoBehaviour
                 feedbackText.text = "电话号码错误，请重新查看目标资料。";
                 feedbackText.color = Color.red;
             }
+        }
+    }
+
+    private void StartChatConversation()
+    {
+        if (conversationStarted) return;
+
+        if (dialogueChatBridge != null)
+        {
+            dialogueChatBridge.OpenChatAndStartConversation(conversationName);
+            conversationStarted = true;
+        }
+        else
+        {
+            Debug.LogError("DialogueChatBridge 没有绑定！");
         }
     }
 
