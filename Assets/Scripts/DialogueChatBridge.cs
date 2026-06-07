@@ -53,8 +53,10 @@ public class DialogueChatBridge : MonoBehaviour
     public TextMeshProUGUI scamRateText;
 
     [Header("诈骗成功率设置")]
-    public int currentScamRate = 0;
     public int maxScamRate = 100;
+
+    [Header("是否进入本场景时重置诈骗分")]
+    public bool resetScamRateOnStart = true;
 
     [Header("选项加分规则")]
     public ChoiceScoreRule[] choiceScoreRules;
@@ -64,6 +66,10 @@ public class DialogueChatBridge : MonoBehaviour
 
     [Header("迷宫等待")]
     public bool waitingForMaze = false;
+
+    [Header("Case03 压力系统")]
+    public bool enableCase03Pressure = false;
+    public Case03ChoicePressure case03ChoicePressure;
 
     private Response[] currentResponses;
     private Response[] pendingResponses;
@@ -76,10 +82,12 @@ public class DialogueChatBridge : MonoBehaviour
         if (nameText != null)
             nameText.text = npcName;
 
-        if (nameText != null)
+        if (nameText2 != null)
             nameText2.text = npcName;
 
-        currentScamRate = 0;
+        if (resetScamRateOnStart)
+            ScamScoreData.CurrentScamRate = 0;
+
         UpdateScamRateUI();
     }
 
@@ -87,16 +95,33 @@ public class DialogueChatBridge : MonoBehaviour
     {
         HideDefaultDialogueUI();
 
+        waitingForMaze = false;
+        currentResponses = null;
+        pendingResponses = null;
+        suppressNextPlayerLine = false;
+
+        if (chatUIManager != null)
+            chatUIManager.ClearChat();
+
         if (chatPanel != null)
             chatPanel.SetActive(true);
 
         ClearOldChoices();
 
-        if (nameText != null)
-            nameText.text = npcName;
+        StartCoroutine(StartConversationNextFrame(conversationTitle));
+    }
 
-        if (nameText != null)
-            nameText2.text = npcName;
+    private IEnumerator StartConversationNextFrame(string conversationTitle)
+    {
+        if (DialogueManager.isConversationActive)
+        {
+            DialogueManager.StopConversation();
+
+            yield return null;
+            yield return null;
+        }
+
+        Debug.Log("准备启动对话：" + conversationTitle);
 
         DialogueManager.StartConversation(conversationTitle);
     }
@@ -111,6 +136,8 @@ public class DialogueChatBridge : MonoBehaviour
     public void OnConversationLine(Subtitle subtitle)
     {
         if (subtitle == null) return;
+
+        Debug.Log("ChatBridge 收到台词：" + subtitle.formattedText.text);
 
         string speakerName = subtitle.speakerInfo.Name;
         string lineText = subtitle.formattedText.text;
@@ -206,6 +233,30 @@ public class DialogueChatBridge : MonoBehaviour
 
         if (responses.Length > 2)
             SetupChoiceButton(choiceButton3, choiceButtonText3, responses[2], 2);
+
+        RegisterChoicesToPressureSystem();
+    }
+
+    private void RegisterChoicesToPressureSystem()
+    {
+        if (!enableCase03Pressure) return;
+        if (case03ChoicePressure == null) return;
+
+        Button[] buttons =
+        {
+            choiceButton1,
+            choiceButton2,
+            choiceButton3
+        };
+
+        TextMeshProUGUI[] texts =
+        {
+            choiceButtonText1,
+            choiceButtonText2,
+            choiceButtonText3
+        };
+
+        case03ChoicePressure.RegisterChoices(buttons, texts);
     }
 
     public void ContinueAfterMaze()
@@ -226,6 +277,7 @@ public class DialogueChatBridge : MonoBehaviour
             return;
 
         button.gameObject.SetActive(true);
+        button.interactable = true;
         buttonText.text = response.formattedText.text;
 
         button.onClick.RemoveAllListeners();
@@ -244,8 +296,14 @@ public class DialogueChatBridge : MonoBehaviour
             chatUIManager.AddRightMessage(playerName, selectedText);
 
         int scoreGain = GetScoreGainForChoice(selectedText);
-        currentScamRate += scoreGain;
-        currentScamRate = Mathf.Clamp(currentScamRate, 0, maxScamRate);
+
+        ScamScoreData.CurrentScamRate += scoreGain;
+        ScamScoreData.CurrentScamRate = Mathf.Clamp(
+            ScamScoreData.CurrentScamRate,
+            0,
+            maxScamRate
+        );
+
         UpdateScamRateUI();
 
         HideChoiceButtons();
@@ -279,7 +337,7 @@ public class DialogueChatBridge : MonoBehaviour
     private void UpdateScamRateUI()
     {
         if (scamRateText != null)
-            scamRateText.text = "诈骗成功率：" + currentScamRate + "%";
+            scamRateText.text = "诈骗成功率：" + ScamScoreData.CurrentScamRate + "%";
     }
 
     private int GetScoreGainForChoice(string selectedChoiceText)
@@ -293,5 +351,21 @@ public class DialogueChatBridge : MonoBehaviour
         }
 
         return 0;
+    }
+
+    public void ResetChatStateOnly()
+    {
+        waitingForMaze = false;
+        currentResponses = null;
+        pendingResponses = null;
+        suppressNextPlayerLine = false;
+
+        HideChoiceButtons();
+
+        if (chatPanel != null)
+            chatPanel.SetActive(false);
+
+        if (chatUIManager != null)
+            chatUIManager.ClearChat();
     }
 }

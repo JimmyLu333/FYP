@@ -18,24 +18,22 @@ public class FormCheckPanelController : MonoBehaviour
     public TextMeshProUGUI completeText;
 
     [Header("绿底背景条")]
-    [Tooltip("依次拖入 Name, ID, Bank, Phone, Code 对应的绿色底框 Image 物体")]
-    public GameObject[] itemGlowBackgrounds; // 长度为 5 的数组
+    public GameObject[] itemGlowBackgrounds;
 
     [Header("配色方案")]
-    public Color normalTextColor = Color.green;     // 默认状态的绿色字
-    public Color highlightedTextColor = Color.black; // 激活状态下的反色黑字
+    public Color normalTextColor = Color.green;
+    public Color highlightedTextColor = Color.black;
 
     [Header("按钮")]
     public Button confirmButton;
 
-    [Header("下一步：CodeRain")]
+    [Header("完成后继续")]
+    public PhoneCallDialogueBridge phoneCallDialogueBridge;
     public CodeRainPuzzle codeRainPuzzle;
 
-    [Header("🚨 速度设置")]
-    [Tooltip("每行检查之间的等待间隔（秒）")]
+    [Header("速度设置")]
     public float checkInterval = 0.8f;
-    [Tooltip("打字机效果：每个字弹出来的间隔时间（秒）。数值越小字蹦得越快！")]
-    public float textSpeed = 0.03f; 
+    public float textSpeed = 0.03f;
 
     private Coroutine checkRoutine;
 
@@ -69,7 +67,6 @@ public class FormCheckPanelController : MonoBehaviour
         if (statusText != null)
             statusText.text = "对方正在填写共享表单...";
 
-        // 初始化时：所有项全清空（等待打字机输入），且隐藏所有绿底
         ClearItemBeforeType(checkItemName, 0);
         ClearItemBeforeType(checkItemID, 1);
         ClearItemBeforeType(checkItemBank, 2);
@@ -83,7 +80,6 @@ public class FormCheckPanelController : MonoBehaviour
             confirmButton.gameObject.SetActive(false);
     }
 
-    // 辅助函数：启动前清空文本
     private void ClearItemBeforeType(TextMeshProUGUI textComponent, int glowIndex)
     {
         if (textComponent != null)
@@ -91,27 +87,29 @@ public class FormCheckPanelController : MonoBehaviour
             textComponent.text = "";
             textComponent.color = normalTextColor;
         }
-        if (itemGlowBackgrounds != null && glowIndex < itemGlowBackgrounds.Length && itemGlowBackgrounds[glowIndex] != null)
+
+        if (itemGlowBackgrounds != null &&
+            glowIndex < itemGlowBackgrounds.Length &&
+            itemGlowBackgrounds[glowIndex] != null)
         {
             itemGlowBackgrounds[glowIndex].SetActive(false);
         }
     }
 
-    // 🌟 核心打字机协程：让指定的文本组件一个字一个字显示
     private IEnumerator TypeText(TextMeshProUGUI textComponent, string fullText)
     {
-        textComponent.text = "";
-        textComponent.color = normalTextColor; // 打字时保持绿字
+        if (textComponent == null) yield break;
 
-        // 逐字追加显示
+        textComponent.text = "";
+        textComponent.color = normalTextColor;
+
         for (int i = 0; i < fullText.Length; i++)
         {
             textComponent.text += fullText[i];
-            yield return new WaitForSeconds(textSpeed); // 🚨 这里控制每个字出来的速度
+            yield return new WaitForSeconds(textSpeed);
         }
     }
 
-    // 辅助函数：快速改变某一行的底层和颜色状态
     private void SetItemGlowState(TextMeshProUGUI textComponent, string text, int glowIndex, bool isHighlighted)
     {
         if (textComponent != null)
@@ -119,7 +117,10 @@ public class FormCheckPanelController : MonoBehaviour
             textComponent.text = text;
             textComponent.color = isHighlighted ? highlightedTextColor : normalTextColor;
         }
-        if (itemGlowBackgrounds != null && glowIndex < itemGlowBackgrounds.Length && itemGlowBackgrounds[glowIndex] != null)
+
+        if (itemGlowBackgrounds != null &&
+            glowIndex < itemGlowBackgrounds.Length &&
+            itemGlowBackgrounds[glowIndex] != null)
         {
             itemGlowBackgrounds[glowIndex].SetActive(isHighlighted);
         }
@@ -127,49 +128,31 @@ public class FormCheckPanelController : MonoBehaviour
 
     IEnumerator CheckSequenceRoutine()
     {
-        // ==========================================
-        // 1. 姓名信息接收
-        // ==========================================
-        yield return StartCoroutine(TypeText(checkItemName, "> 姓名信息：✓ 已接收")); // 逐字打印
-        SetItemGlowState(checkItemName, "> 姓名信息：✓ 已接收", 0, true);          // 打印完，亮起本行绿底
-        yield return new WaitForSeconds(checkInterval);                             // 停留观察
-
-        // ==========================================
-        // 2. 身份证信息接收
-        // ==========================================
-        SetItemGlowState(checkItemName, "  姓名信息：✓ 已接收", 0, false);         // 关掉第一行绿底
-        yield return StartCoroutine(TypeText(checkItemID, "> 身份证信息：✓ 已接收")); // 逐字打印第二行
-        SetItemGlowState(checkItemID, "> 身份证信息：✓ 已接收", 1, true);           // 亮起第二行绿底
+        yield return StartCoroutine(TypeText(checkItemName, "> 姓名信息：已接收"));
+        SetItemGlowState(checkItemName, "> 姓名信息：已接收", 0, true);
         yield return new WaitForSeconds(checkInterval);
 
-        // ==========================================
-        // 3. 银行卡号接收
-        // ==========================================
-        SetItemGlowState(checkItemID, "  身份证信息：✓ 已接收", 1, false);          // 关掉第二行绿底
-        yield return StartCoroutine(TypeText(checkItemBank, "> 银行卡号：✓ 已接收")); // 逐字打印第三行
-        SetItemGlowState(checkItemBank, "> 银行卡号：✓ 已接收", 2, true);           // 亮起第三行绿底
+        SetItemGlowState(checkItemName, "  姓名信息：已接收", 0, false);
+        yield return StartCoroutine(TypeText(checkItemID, "> 身份证信息：已接收"));
+        SetItemGlowState(checkItemID, "> 身份证信息：已接收", 1, true);
         yield return new WaitForSeconds(checkInterval);
 
-        // ==========================================
-        // 4. 手机号接收
-        // ==========================================
-        SetItemGlowState(checkItemBank, "  银行卡号：✓ 已接收", 2, false);          // 关掉第三行绿底
-        yield return StartCoroutine(TypeText(checkItemPhone, "> 手机号：✓ 已接收"));  // 逐字打印第四行
-        SetItemGlowState(checkItemPhone, "> 手机号：✓ 已接收", 3, true);            // 亮起第四行绿底
+        SetItemGlowState(checkItemID, "  身份证信息：已接收", 1, false);
+        yield return StartCoroutine(TypeText(checkItemBank, "> 银行卡号：已接收"));
+        SetItemGlowState(checkItemBank, "> 银行卡号：已接收", 2, true);
         yield return new WaitForSeconds(checkInterval);
 
-        // ==========================================
-        // 5. 验证码状态接收
-        // ==========================================
-        SetItemGlowState(checkItemPhone, "  手机号：✓ 已接收", 3, false);           // 关掉第四行绿底
-        yield return StartCoroutine(TypeText(checkItemCode, "> 验证码状态：Pending...")); // 逐字打印第五行
-        SetItemGlowState(checkItemCode, "> 验证码状态：Pending...", 4, true);          // 亮起第五行绿底
+        SetItemGlowState(checkItemBank, "  银行卡号：已接收", 2, false);
+        yield return StartCoroutine(TypeText(checkItemPhone, "> 手机号：已接收"));
+        SetItemGlowState(checkItemPhone, "> 手机号：已接收", 3, true);
         yield return new WaitForSeconds(checkInterval);
 
-        // ==========================================
-        // 结束阶段
-        // ==========================================
-        SetItemGlowState(checkItemCode, "  验证码状态：Pending...", 4, false);         // 扫描完，关闭最后一行的绿底
+        SetItemGlowState(checkItemPhone, "  手机号：已接收", 3, false);
+        yield return StartCoroutine(TypeText(checkItemCode, "> 验证码状态：Pending..."));
+        SetItemGlowState(checkItemCode, "> 验证码状态：Pending...", 4, true);
+        yield return new WaitForSeconds(checkInterval);
+
+        SetItemGlowState(checkItemCode, "  验证码状态：Pending...", 4, false);
 
         if (statusText != null)
             statusText.text = "资料提交完成，等待后台接收。";
@@ -185,6 +168,11 @@ public class FormCheckPanelController : MonoBehaviour
     {
         if (formCheckPanel != null)
             formCheckPanel.SetActive(false);
+
+        if (phoneCallDialogueBridge != null)
+            phoneCallDialogueBridge.ContinueAfterFormCheck();
+        else
+            Debug.LogError("PhoneCallDialogueBridge 没有绑定！");
 
         if (codeRainPuzzle != null)
             codeRainPuzzle.StartCodeRain();
