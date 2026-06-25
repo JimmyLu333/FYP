@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; // 👈 確保這行絕對有寫，且沒有拼錯
+using TMPro;
 
 public class BrowserManager : MonoBehaviour
 {
@@ -12,18 +12,37 @@ public class BrowserManager : MonoBehaviour
     public GameObject panelResult;   
     public GameObject panel404;      
 
+    public ScrollRect resultScrollRect; // 👈 加上这行，用来绑定图2的滚动组件
+
     [Header("Search Inputs")]
     public TMP_InputField searchInputField; 
+    public Button searchButton; // 👈 1. 在这里新增一个搜索按钮的引用
 
-    [Header("Result Components")]
-    public ScrollRect resultScrollRect; 
-
-    // 模擬的數據庫：存放合法的角色編號（例如 MOLT 遊戲中的主角陳默編號，或其它測試編號）
-    private string[] validCharacterIDs = { "1001", "1002", "劉福來", "ChenMo" }; 
+    private string[] validCharacterIDs = { "1001", "1002", "刘福来", "ChenMo" }; 
 
     void Start()
     {
         ShowSearchPage();
+
+        // 👈 2. 核心：在游戏开始时，实时监听输入框的文字改变事件
+        if (searchInputField != null)
+        {
+            searchInputField.onValueChanged.AddListener(OnInputValueChanged);
+        }
+        
+        // 👈 3. 初始化：刚开局输入框是空的，调用一次确保按钮默认按不动
+        OnInputValueChanged(searchInputField.text);
+    }
+
+    // 👈 4. 新增：当输入框内容发生变化时，会自动触发这个函数
+    void OnInputValueChanged(string currentText)
+    {
+        if (searchButton != null)
+        {
+            // 去除空格后，如果输入框不为空，则按钮可以交互（Interactable = true），同时视觉自动切到 Normal 亮蓝色
+            // 如果为空，则按钮无法交互（Interactable = false），视觉自动切到 Disabled 灰色
+            searchButton.interactable = !string.IsNullOrWhiteSpace(currentText);
+        }
     }
 
     public void OnSearchButtonClick()
@@ -79,5 +98,14 @@ public class BrowserManager : MonoBehaviour
         panelResult.SetActive(false);
         panel404.SetActive(true);
         urlInputField.text = "http://Mogle.mainpage.com/error404";
+    }
+
+    // 良好的习惯：在销毁时移除监听
+    void OnDestroy()
+    {
+        if (searchInputField != null)
+        {
+            searchInputField.onValueChanged.RemoveListener(OnInputValueChanged);
+        }
     }
 }
