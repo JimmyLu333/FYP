@@ -1,9 +1,31 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 public class BrowserManager : MonoBehaviour
 {
+    [Serializable]
+    public struct CharacterData
+    {
+        public string characterID;       // 搜索关键词/编号（如：1001）
+        public Sprite photo;            // 角色头像
+        public string characterName;     // 角色名字
+
+        // 👈 数据库里只需要保留纯内容文本
+        [TextArea(2, 5)]
+        public string infoContent;       // 姓名、年龄、电话等
+        [TextArea(3, 10)]
+        public string backgroundContent; // 刚获得一笔拆迁款等
+        [TextArea(3, 10)]
+        public string usefulContent;     // 高度溺爱孙子等
+        [TextArea(3, 10)]
+        public string targetContent;     // 1: 欺骗他... 2: 假装医生...
+    }
+
+    [Header("Database")]
+    public CharacterData[] allCharacters; 
+
     [Header("Top Bar")]
     public TMP_InputField urlInputField; 
 
@@ -11,36 +33,34 @@ public class BrowserManager : MonoBehaviour
     public GameObject panelSearch;   
     public GameObject panelResult;   
     public GameObject panel404;      
-
-    public ScrollRect resultScrollRect; // 👈 加上这行，用来绑定图2的滚动组件
+    public ScrollRect resultScrollRect; 
 
     [Header("Search Inputs")]
     public TMP_InputField searchInputField; 
-    public Button searchButton; // 👈 1. 在这里新增一个搜索按钮的引用
+    public Button searchButton; 
 
-    private string[] validCharacterIDs = { "1001", "1002", "刘福来", "ChenMo" }; 
+    [Header("Result UI Components (只绑定内容Text)")]
+    public Image resultPhotoImage;       
+    public TMP_Text resultNameText;      
+    public TMP_Text resultInfoText;       // 👈 绑定 Value_Info
+    public TMP_Text resultBackgroundText; // 👈 绑定 Value_Bg
+    public TMP_Text resultUsefulText;     // 👈 绑定 Value_Useful
+    public TMP_Text resultTargetText;     // 👈 绑定 Value_Target
 
     void Start()
     {
         ShowSearchPage();
-
-        // 👈 2. 核心：在游戏开始时，实时监听输入框的文字改变事件
         if (searchInputField != null)
         {
             searchInputField.onValueChanged.AddListener(OnInputValueChanged);
         }
-        
-        // 👈 3. 初始化：刚开局输入框是空的，调用一次确保按钮默认按不动
         OnInputValueChanged(searchInputField.text);
     }
 
-    // 👈 4. 新增：当输入框内容发生变化时，会自动触发这个函数
     void OnInputValueChanged(string currentText)
     {
         if (searchButton != null)
         {
-            // 去除空格后，如果输入框不为空，则按钮可以交互（Interactable = true），同时视觉自动切到 Normal 亮蓝色
-            // 如果为空，则按钮无法交互（Interactable = false），视觉自动切到 Disabled 灰色
             searchButton.interactable = !string.IsNullOrWhiteSpace(currentText);
         }
     }
@@ -50,19 +70,19 @@ public class BrowserManager : MonoBehaviour
         string input = searchInputField.text.Trim();
         if (string.IsNullOrEmpty(input)) return;
 
-        bool isCharacterFound = false;
-        foreach (string id in validCharacterIDs)
+        CharacterData? foundCharacter = null;
+        foreach (var character in allCharacters)
         {
-            if (input == id)
+            if (character.characterID == input || character.characterName == input)
             {
-                isCharacterFound = true;
+                foundCharacter = character;
                 break;
             }
         }
 
-        if (isCharacterFound)
+        if (foundCharacter != null)
         {
-            ShowResultPage(input);
+            ShowResultPage(foundCharacter.Value);
         }
         else
         {
@@ -79,12 +99,22 @@ public class BrowserManager : MonoBehaviour
         searchInputField.text = ""; 
     }
 
-    void ShowResultPage(string characterID)
+    void ShowResultPage(CharacterData data)
     {
         panelSearch.SetActive(false);
         panelResult.SetActive(true);
         panel404.SetActive(false);
-        urlInputField.text = "http://file:///D:/Information/" + characterID + ".html";
+        
+        urlInputField.text = "http://file:///D:/Information/" + data.characterID + ".html";
+
+        if (resultPhotoImage != null) resultPhotoImage.sprite = data.photo;
+        if (resultNameText != null) resultNameText.text = data.characterName;
+        
+        // 👈 动态刷新四个纯内容区域
+        if (resultInfoText != null) resultInfoText.text = data.infoContent;
+        if (resultBackgroundText != null) resultBackgroundText.text = data.backgroundContent;
+        if (resultUsefulText != null) resultUsefulText.text = data.usefulContent;
+        if (resultTargetText != null) resultTargetText.text = data.targetContent;
 
         if (resultScrollRect != null)
         {
@@ -100,7 +130,6 @@ public class BrowserManager : MonoBehaviour
         urlInputField.text = "http://Mogle.mainpage.com/error404";
     }
 
-    // 良好的习惯：在销毁时移除监听
     void OnDestroy()
     {
         if (searchInputField != null)
