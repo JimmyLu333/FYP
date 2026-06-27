@@ -2192,7 +2192,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -1.0651245, y: -356}
+  m_AnchoredPosition: {x: -1.0651855, y: -356}
   m_SizeDelta: {x: -109.82, y: -803.27}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &214050738
@@ -3146,7 +3146,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -6.0438843, y: 92.262085}
+  m_AnchoredPosition: {x: -6.0439453, y: 92.262085}
   m_SizeDelta: {x: -99.8605, y: -337.8558}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &257881917
@@ -9017,6 +9017,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2383fe73babdecb459a07e2bdf12ce78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  npcStages:
+  - npcName: "\u5218\u798F\u6765"
+    personalityAndBg: 
+    currentTask: 
+    failWarning: 
+  currentStageIndex: 0
   apiKey: sk-dicivdzcvqtgnohxjhiysmqidjjjipmegewdegkscyvljutv
   playerBubblePrefab: {fileID: 2892153798305146208, guid: 0e31066f50bdc25408cb6bd8601d10fa, type: 3}
   npcBubblePrefab: {fileID: 1283008772321842444, guid: da9afb5f78a5fa54fbc6568d5f78a16a, type: 3}
