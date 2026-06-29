@@ -51,7 +51,7 @@ public class GameplayVoiceController : MonoBehaviour
     [SerializeField] private GameObject keyboardInputPanel;
     [SerializeField] private TMP_InputField chatInputField;
 
-    [Header("✨ 任务笔记本 UI 组件")]
+    [Header("任务笔记本 UI 组件")]
     [SerializeField] private Button hintButton;
     [SerializeField] private GameObject taskPanel;
     [SerializeField] private Button closeTaskButton;
@@ -108,7 +108,7 @@ public class GameplayVoiceController : MonoBehaviour
         if (subtitleText != null) subtitleText.text = "";
         if (micTimerText != null) micTimerText.text = "";
 
-        // 🎯 ✨ 核心修改 1：只要启动游戏，默认把键盘输入框面板和切换按钮都正常亮起！
+        //  核心修改 1：只要启动游戏，默认把键盘输入框面板和切换按钮都正常亮起！
         if (voiceInputPanel != null) voiceInputPanel.SetActive(true);
         if (keyboardInputPanel != null) keyboardInputPanel.SetActive(false);
 
@@ -119,7 +119,7 @@ public class GameplayVoiceController : MonoBehaviour
 
         UpdateTaskUI();
 
-        // 🎯 ✨ 核心修改 2：把原本强行放在 Start 里的 DictationRecognizer 初始化代码全切掉！
+        //  核心修改 2：把原本强行放在 Start 里的 DictationRecognizer 初始化代码全切掉！
         // 这样即使项目里其他脚本报警，我们这个脚本也可以 100% 毫无阻碍地跑完第一帧。
 
         SpawnNPCDialogue("喂？您好，请问您是哪位？有什么事吗？");
@@ -136,7 +136,7 @@ public class GameplayVoiceController : MonoBehaviour
         }
     }
 
-    // ✨ 核心修改 3：延时单例初始化，只有点麦克风时才去碰硬件，不点就永远不报错
+    // ✨核心修改 3：延时单例初始化，只有点麦克风时才去碰硬件，不点就永远不报错
     private bool TryInitializeDictation()
     {
         if (isDictationInitialized) return true;
@@ -255,7 +255,7 @@ public class GameplayVoiceController : MonoBehaviour
     {
         if (isGameOver) return;
 
-        // 🎯 只有点按钮时才动态检查，失败了就强制引导去打字，绝不卡死
+        // 只有点按钮时才动态检查，失败了就强制引导去打字，绝不卡死
         if (!isRecording)
         {
             if (!TryInitializeDictation())

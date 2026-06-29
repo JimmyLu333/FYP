@@ -11021,6 +11021,10 @@ MonoBehaviour:
   statusText: {fileID: 0}
   voiceWaveObject: {fileID: 410473087}
   micButton: {fileID: 1911821970}
+  micButtonImage: {fileID: 0}
+  micDisabledSprite: {fileID: 0}
+  micNormalSprite: {fileID: 0}
+  micActiveSprite: {fileID: 0}
   topCallTimerText: {fileID: 256060669}
   micTimerText: {fileID: 606185561}
   subtitleText: {fileID: 113295917}
@@ -28624,7 +28628,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Content: {fileID: 1156273880}
   m_Horizontal: 1
-  m_Vertical: 1
+  m_Vertical: 0
   m_MovementType: 1
   m_Elasticity: 0.1
   m_Inertia: 1
