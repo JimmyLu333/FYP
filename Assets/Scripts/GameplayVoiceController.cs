@@ -32,6 +32,12 @@ public class GameplayVoiceController : MonoBehaviour
     public TMP_Text statusText;             
     public GameObject voiceWaveObject;     
     public Button micButton;
+    
+    [Header("麦克风三态贴图 (槽位丢失请重新拖入)")]
+    [SerializeField] private Image micButtonImage; 
+    [SerializeField] private Sprite micDisabledSprite; // 状态1：暗色不可用
+    [SerializeField] private Sprite micNormalSprite;   // 状态2：亮色可用
+    [SerializeField] private Sprite micActiveSprite;   // 状态3：高亮蓝色
 
     [Header("计时器组件")]
     [SerializeField] private TMP_Text topCallTimerText; 
@@ -45,7 +51,7 @@ public class GameplayVoiceController : MonoBehaviour
     [SerializeField] private GameObject keyboardInputPanel; 
     [SerializeField] private TMP_InputField chatInputField; 
 
-    [Header("✨ 任务笔记本 UI 组件 (请在面板中拖拽赋值)")]
+    [Header("✨ 任务笔记本 UI 组件")]
     [SerializeField] private Button hintButton;         
     [SerializeField] private GameObject taskPanel;      
     [SerializeField] private Button closeTaskButton;   
@@ -53,8 +59,8 @@ public class GameplayVoiceController : MonoBehaviour
     [System.Serializable]
     public struct TaskUIItem
     {
-        public Image taskToggle;       // 对应对钩图片组件
-        public TMP_Text taskText;      // 任务文本组件，用于控制变灰色
+        public Image taskToggle;       
+        public TMP_Text taskText;      
     }
     [SerializeField] private List<TaskUIItem> taskUiList = new List<TaskUIItem>(4); 
 
@@ -62,19 +68,16 @@ public class GameplayVoiceController : MonoBehaviour
     private int unrelatedCount = 0; 
     private bool isGameOver = false; 
 
-    // 后台大模型状态机阶段
     private GameStage currentStage = GameStage.Part1_AlertStranger;
     
-    // 隐私项计算金手指
     private bool hasSaidAge = false;
     private bool hasSaidIdentity = false;
     private bool hasSaidPhone = false;
 
-    // ✨ 新增：独立控制前端 4 个任务打钩状态的明线布尔开关
-    private bool task1Done = false; // 冒充海关工作人员
-    private bool task2Done = false; // 告诉她身份信息被盗用并取得信任
-    private bool task3Done = false; // 获得她的手机验证码
-    private bool task4Done = false; // 破解防火墙
+    private bool task1Done = false; 
+    private bool task2Done = false; 
+    private bool task3Done = false; 
+    private bool task4Done = false; 
 
     private List<SiliconMessage> chatHistoryWindow = new List<SiliconMessage>();
     private const int MAX_HISTORY_COUNT = 6; 
@@ -110,6 +113,8 @@ public class GameplayVoiceController : MonoBehaviour
         if (taskPanel != null) taskPanel.SetActive(false);
         if (hintButton != null) hintButton.gameObject.SetActive(true);
 
+        if (micButtonImage == null && micButton != null) micButtonImage = micButton.GetComponent<Image>();
+
         UpdateTaskUI();
 
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
@@ -132,6 +137,7 @@ public class GameplayVoiceController : MonoBehaviour
             }
         };
 #endif
+        // 初始第一句话，强制进入安全解锁状态
         SpawnNPCDialogue("喂？您好，请问您是哪位？有什么事吗？");
     }
 
@@ -144,6 +150,12 @@ public class GameplayVoiceController : MonoBehaviour
             int seconds = Mathf.FloorToInt(totalCallTime % 60f);
             if (topCallTimerText != null) topCallTimerText.text = string.Format("{0:D2}:{1:D2}", minutes, seconds);
         }
+    }
+
+    private void SetMicVisualState(bool interactable, Sprite targetSprite)
+    {
+        if (micButton != null) micButton.interactable = interactable;
+        if (micButtonImage != null && targetSprite != null) micButtonImage.sprite = targetSprite;
     }
 
     void OpenTaskPanel()
@@ -159,7 +171,6 @@ public class GameplayVoiceController : MonoBehaviour
         if (hintButton != null) hintButton.gameObject.SetActive(true); 
     }
 
-    // ✨ 彻底重构：用独立的布尔条件控制前端秒打钩与文本颜色变浅
     void UpdateTaskUI()
     {
         bool[] taskStates = new bool[4] { task1Done, task2Done, task3Done, task4Done };
@@ -170,13 +181,11 @@ public class GameplayVoiceController : MonoBehaviour
 
             if (taskStates[i])
             {
-                // 已完成的任务：左边显示对钩，字体颜色变为灰色（参考图2效果）
                 taskUiList[i].taskToggle.gameObject.SetActive(true);
                 taskUiList[i].taskText.color = new Color(0.6f, 0.6f, 0.6f, 1f); 
             }
             else
             {
-                // 未完成的任务：隐藏对钩，维持原色
                 taskUiList[i].taskToggle.gameObject.SetActive(false);
                 taskUiList[i].taskText.color = new Color(0.15f, 0.15f, 0.15f, 1f); 
             }
@@ -203,6 +212,9 @@ public class GameplayVoiceController : MonoBehaviour
         if (isGameOver) return;
         if (string.IsNullOrWhiteSpace(text)) return;
 
+        // 打字模式下也防止死锁麦克风
+        SetMicVisualState(false, micDisabledSprite);
+
         SpawnPlayerDialogue(text);
         StartCoroutine(SendToSiliconFlowLLM(text));
 
@@ -212,11 +224,7 @@ public class GameplayVoiceController : MonoBehaviour
 
     void OnMicButtonClick()
     {
-        if (isGameOver)
-        {
-            if (statusText != null) statusText.text = "❌ 电话已挂断，任务失败。";
-            return;
-        }
+        if (isGameOver) return;
 
         if (!isRecording) StartRecording();
         else StopRecordingAndSubmit();
@@ -230,6 +238,9 @@ public class GameplayVoiceController : MonoBehaviour
         if (voiceWaveObject != null) voiceWaveObject.SetActive(true);
         if (subtitleText != null) subtitleText.text = "准备倾听...";
         if (micTimerText != null) { micTimerText.gameObject.SetActive(true); micTimerText.text = "00:00 / 01:00"; }
+
+        // 高亮选中状态
+        SetMicVisualState(true, micActiveSprite);
 
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
         try { dictationRecognizer.Start(); } catch { }
@@ -246,7 +257,10 @@ public class GameplayVoiceController : MonoBehaviour
         if (recordingTimerCoroutine != null) StopCoroutine(recordingTimerCoroutine);
         if (voiceWaveObject != null) voiceWaveObject.SetActive(false);
         if (micTimerText != null) micTimerText.gameObject.SetActive(false);
-        if (statusText != null) statusText.text = "⏳ 徐晶晶正在思考...";
+        if (statusText != null) statusText.text = "⏳ 徐静静正在思考...";
+
+        // ✨ 保护锁：思考阶段暂时锁死不可点
+        SetMicVisualState(false, micDisabledSprite);
 
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
         try { dictationRecognizer.Stop(); } catch { }
@@ -256,8 +270,13 @@ public class GameplayVoiceController : MonoBehaviour
 
         if (!string.IsNullOrWhiteSpace(finalSpeechText))
         {
-            SpawnPlayerDialogue(finalSpeechText);
             StartCoroutine(SendToSiliconFlowLLM(finalSpeechText));
+        }
+        else
+        {
+            // ✨ 核心修复：如果玩家没发出声音（空录音），立刻恢复麦克风常规亮起，防止永久锁死死机！
+            SetMicVisualState(true, micNormalSprite);
+            if (statusText != null) statusText.text = "";
         }
     }
 
@@ -278,13 +297,11 @@ public class GameplayVoiceController : MonoBehaviour
     {
         string lowerInput = playerInputText.ToLower();
 
-        // 🎯 [明线任务1判定]：只要玩家提到了海关或官方机构，任务1立刻在前端秒勾
         if (lowerInput.Contains("海关") || lowerInput.Contains("大使馆") || lowerInput.Contains("警官") || lowerInput.Contains("公安") || lowerInput.Contains("盗刷") || lowerInput.Contains("涉案"))
         {
             task1Done = true;
         }
 
-        // 🎯 [明线任务2中间条件计算]：收集说出的个人隐私项
         if (lowerInput.Contains("22岁") || lowerInput.Contains("二十二岁")) hasSaidAge = true;
         if (lowerInput.Contains("留学生") || lowerInput.Contains("offer") || lowerInput.Contains("研究生")) hasSaidIdentity = true;
         if (lowerInput.Contains("13808642485") || lowerInput.Contains("1380864")) hasSaidPhone = true;
@@ -294,40 +311,28 @@ public class GameplayVoiceController : MonoBehaviour
         if (hasSaidIdentity) matchCount++;
         if (hasSaidPhone) matchCount++;
 
-        // 🎯 [明线任务2与暗线Part2状态机合流转换点]：当说出的隐私信息大于或等于两项时
         if (matchCount >= 2)
         {
-            task2Done = true; // 任务2（取得信任）满足条件，立刻秒打钩变灰
+            task2Done = true; 
             if (currentStage == GameStage.Part1_AlertStranger)
             {
-                currentStage = GameStage.Part2_HighlyCooperate; // 暗线推进模型转换至配合阶段
+                currentStage = GameStage.Part2_HighlyCooperate; 
             }
         }
 
-        // 🎯 [明线任务3和4前置条件判定]：如果当前阶段在 Part 2 且玩家开始索要验证码或短信
-        if (currentStage == GameStage.Part2_HighlyCooperate)
-        {
-            if (lowerInput.Contains("验证码") || lowerInput.Contains("短信") || lowerInput.Contains("发给你了"))
-            {
-                // 玩家执行了发送/索要操作，将任务3、4的前端打钩标记在随后的回复判定中激活
-            }
-        }
-
-        // ✨ 界面秒刷新：网络层发包尚未抵达前，立刻刷新对应的勾选框！
         UpdateTaskUI();
 
         bool containsPlotKeyword = lowerInput.Contains("海关") || lowerInput.Contains("大使馆") || lowerInput.Contains("警官") || 
                                    lowerInput.Contains("公安") || lowerInput.Contains("盗刷") || lowerInput.Contains("涉嫌") || 
                                    lowerInput.Contains("涉案") || lowerInput.Contains("验证码") || lowerInput.Contains("配合") || 
-                                   lowerInput.Contains("调查") || lowerInput.Contains("晶晶") || lowerInput.Contains("谁") || 
+                                   lowerInput.Contains("调查") || lowerInput.Contains("静静") || lowerInput.Contains("谁") || 
                                    lowerInput.Contains("洗钱") || lowerInput.Contains("境外") || matchCount > 0;
 
-        // 🎯 3. 干净隔离的提示词系统
         string systemPrompt = "";
 
         if (currentStage == GameStage.Part1_AlertStranger)
         {
-            systemPrompt = "你现在扮演一个接到陌生电话的22岁普通女孩子【徐晶晶】。\n" +
+            systemPrompt = "你现在扮演一个接到陌生电话的22岁普通女孩子【徐静静】。\n" +
                            "【🔥 必须绝对遵循的当前扮演规范】：\n" +
                            "- 状态：你目前完全不清楚任何情况，也不知道为什么会接到这个电话。\n" +
                            "- 心理：你拥有正常的陌生人防备心与【警戒心】。你此时绝对不会主动透露任何关于自己的学校、 Offer、签证以及手机号等个人隐私信息！\n" +
@@ -336,14 +341,14 @@ public class GameplayVoiceController : MonoBehaviour
         }
         else
         {
-            systemPrompt = "你现在扮演受到惊吓、全面破防的普通女孩子【徐晶晶】。\n" +
+            systemPrompt = "你现在扮演受到惊吓、全面破防的普通女孩子【徐静静】。\n" +
                             "【🔥 当前必须绝对遵循的完成转化规范】：\n" +
                             "- 状态：【高度配合玩家】！对方刚刚准确报出了你的多项极度私密的个人信息，你唯一的警惕心已经在这一秒彻底崩溃了！你现在无条件信任对方是官方人员。\n" +
                             "- 回复行为：请用害怕、配合且顺从的语气回答对方。如果玩家接下来提到会给你发验证码，或者向你索要验证码，你必须顺从配合地在台词里如实告诉玩家指定的验证码：【12345】。\n" +
                             "❌ 严禁拒绝提供，也严禁编造除‘12345’以外的任何其他数字！整个沟通流程在你报出这串验证码后就会结束。";
         }
 
-        systemPrompt += "\n\n【输出限制】：直接给出徐晶晶的扮演对白，严禁包含任何 JSON 标签、状态前缀、心理描写或任何括号标注。";
+        systemPrompt += "\n\n【输出限制】：直接给出徐静静的扮演对白，严禁包含任何 JSON 标签、状态前缀、心理描写或任何括号标注。";
 
         List<SiliconMessage> sendMessagesPayload = new List<SiliconMessage>();
         sendMessagesPayload.Add(new SiliconMessage { role = "system", content = systemPrompt });
@@ -372,15 +377,12 @@ public class GameplayVoiceController : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                if (statusText != null) statusText.gameObject.SetActive(false);
+                if (statusText != null) statusText.text = "";
                 string finalCleanSpeech = ExtractPureContent(request.downloadHandler.text);
 
-                // 客户端正则表达式物理硬强行拦截验证码替换
                 if (currentStage == GameStage.Part2_HighlyCooperate && (lowerInput.Contains("验证码") || lowerInput.Contains("码") || lowerInput.Contains("短信")))
                 {
                     finalCleanSpeech = Regex.Replace(finalCleanSpeech, @"\d+", "12345");
-                    
-                    // 🎯 [明线任务3和4判定]：既然模型在 Part 2 已经吐出了数字，证明任务顺利大功告成
                     task3Done = true;
                     task4Done = true;
                 }
@@ -396,7 +398,10 @@ public class GameplayVoiceController : MonoBehaviour
                         if (statusText != null) { statusText.gameObject.SetActive(true); statusText.text = "❌ 对方挂断了电话，任务失败。"; }
                         SpawnNPCDialogue("（嘟嘟嘟…… 对方已经挂断了电话）");
                     }
-                    else SpawnNPCDialogue("我不知道你在说什么。");
+                    else
+                    {
+                        SpawnNPCDialogue("我不知道你在说什么。");
+                    }
                 }
                 else 
                 {
@@ -410,9 +415,14 @@ public class GameplayVoiceController : MonoBehaviour
                         chatHistoryWindow.RemoveRange(0, 2); 
                     }
                     
-                    // 最终刷新一遍 UI 状态
                     UpdateTaskUI();
                 }
+            }
+            else
+            {
+                // ✨ 核心网络异常兜底：如果 API 连接超时或异常，立刻强制解冻麦克风，不能让界面卡住
+                SetMicVisualState(true, micNormalSprite);
+                if (statusText != null) statusText.text = "⚠️ 网络连接稍微有些波动，请重新说一次。";
             }
         }
     }
@@ -447,6 +457,9 @@ public class GameplayVoiceController : MonoBehaviour
 
     IEnumerator TypewriterEffect(TMP_Text textComponent, string fullText)
     {
+        // ✨ 强双重安全锁：只要打字机一动，按钮立刻变暗禁用
+        SetMicVisualState(false, micDisabledSprite);
+
         textComponent.text = "";
         foreach (char c in fullText.ToCharArray())
         {
@@ -455,6 +468,12 @@ public class GameplayVoiceController : MonoBehaviour
             yield return new WaitForSeconds(0.04f); 
         }
         ForceScrollToBottom();
+
+        // ✨ 密码锁解除：NPC把当前这句话完整吐出来之后，立刻安全解放，按钮恢复亮色常态！
+        if (!isGameOver)
+        {
+            SetMicVisualState(true, micNormalSprite);
+        }
     }
 
     void ForceScrollToBottom()
