@@ -1,86 +1,86 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; 
+using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine.Networking;
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
-using UnityEngine.Windows.Speech; 
+using UnityEngine.Windows.Speech;
 #endif
 
 public class GameplayVoiceController : MonoBehaviour
 {
     private enum GameStage
     {
-        Part1_AlertStranger,   // Part 1：不清楚任何情况，带有警戒心，绝不泄漏留学隐私
-        Part2_HighlyCooperate  // Part 2：说出大于两项隐私后触发，全面破防高度配合玩家
+        Part1_AlertStranger,
+        Part2_HighlyCooperate
     }
 
     [Header("API Config")]
-    public string apiKey = "sk-xxxxxxxxxxxxxxxxxxxx"; 
+    public string apiKey = "sk-xxxxxxxxxxxxxxxxxxxx";
     private string llmUrl = "https://api.siliconflow.cn/v1/chat/completions";
     private string llmModelName = "Qwen/Qwen2.5-7B-Instruct";
 
     [Header("UI Prefabs")]
-    public GameObject playerBubblePrefab; 
-    public GameObject npcBubblePrefab;    
-    public Transform chatContentTrans;    
+    public GameObject playerBubblePrefab;
+    public GameObject npcBubblePrefab;
+    public Transform chatContentTrans;
 
     [Header("Visual Elements")]
-    public TMP_Text statusText;             
-    public GameObject voiceWaveObject;     
+    public TMP_Text statusText;
+    public GameObject voiceWaveObject;
     public Button micButton;
-    
+
     [Header("麦克风三态贴图")]
-    [SerializeField] private Image micButtonImage; 
-    [SerializeField] private Sprite micDisabledSprite; 
-    [SerializeField] private Sprite micNormalSprite;   
-    [SerializeField] private Sprite micActiveSprite;   
+    [SerializeField] private Image micButtonImage;
+    [SerializeField] private Sprite micDisabledSprite;
+    [SerializeField] private Sprite micNormalSprite;
+    [SerializeField] private Sprite micActiveSprite;
 
     [Header("计时器组件")]
-    [SerializeField] private TMP_Text topCallTimerText; 
-    [SerializeField] private TMP_Text micTimerText;     
-    [SerializeField] private TMP_Text subtitleText;     
+    [SerializeField] private TMP_Text topCallTimerText;
+    [SerializeField] private TMP_Text micTimerText;
+    [SerializeField] private TMP_Text subtitleText;
 
     [Header("打字输入组件")]
-    [SerializeField] private Button switchInputModeButton; 
-    [SerializeField] private Button switchVoiceModeButton;  
-    [SerializeField] private GameObject voiceInputPanel;    
-    [SerializeField] private GameObject keyboardInputPanel; 
-    [SerializeField] private TMP_InputField chatInputField; 
+    [SerializeField] private Button switchInputModeButton;
+    [SerializeField] private Button switchVoiceModeButton;
+    [SerializeField] private GameObject voiceInputPanel;
+    [SerializeField] private GameObject keyboardInputPanel;
+    [SerializeField] private TMP_InputField chatInputField;
 
     [Header("✨ 任务笔记本 UI 组件")]
-    [SerializeField] private Button hintButton;         
-    [SerializeField] private GameObject taskPanel;      
-    [SerializeField] private Button closeTaskButton;   
+    [SerializeField] private Button hintButton;
+    [SerializeField] private GameObject taskPanel;
+    [SerializeField] private Button closeTaskButton;
 
     [System.Serializable]
     public struct TaskUIItem
     {
-        public Image taskToggle;       
-        public TMP_Text taskText;      
+        public Image taskToggle;
+        public TMP_Text taskText;
     }
-    [SerializeField] private List<TaskUIItem> taskUiList = new List<TaskUIItem>(4); 
+    [SerializeField] private List<TaskUIItem> taskUiList = new List<TaskUIItem>(4);
 
     [Header("Anti-Fraud Gameplay Settings")]
-    private int unrelatedCount = 0; 
-    private bool isGameOver = false; 
+    private int unrelatedCount = 0;
+    private bool isGameOver = false;
 
     private GameStage currentStage = GameStage.Part1_AlertStranger;
-    
+
     private bool hasSaidAge = false;
     private bool hasSaidIdentity = false;
     private bool hasSaidPhone = false;
 
-    private bool task1Done = false; 
-    private bool task2Done = false; 
-    private bool task3Done = false; 
-    private bool task4Done = false; 
+    private bool task1Done = false;
+    private bool task2Done = false;
+    private bool task3Done = false;
+    private bool task4Done = false;
 
     private List<SiliconMessage> chatHistoryWindow = new List<SiliconMessage>();
-    private const int MAX_HISTORY_COUNT = 6; 
+    private const int MAX_HISTORY_COUNT = 6;
 
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
     private DictationRecognizer dictationRecognizer;
@@ -88,10 +88,10 @@ public class GameplayVoiceController : MonoBehaviour
     private bool isRecording = false;
     private StringBuilder recordingResultText = new StringBuilder();
     private Coroutine recordingTimerCoroutine;
-    private const float MAX_RECORDING_TIME = 60f; 
+    private const float MAX_RECORDING_TIME = 60f;
 
     private float totalCallTime = 0f;
-    private bool isMicHardwareAvailable = true; // ✨ 标志位：记录麦克风硬件是否可用
+    private bool isDictationInitialized = false; // 记录识别器是否初始化
 
     void Start()
     {
@@ -107,7 +107,8 @@ public class GameplayVoiceController : MonoBehaviour
         if (statusText != null) statusText.text = "";
         if (subtitleText != null) subtitleText.text = "";
         if (micTimerText != null) micTimerText.text = "";
-        
+
+        // 🎯 ✨ 核心修改 1：只要启动游戏，默认把键盘输入框面板和切换按钮都正常亮起！
         if (voiceInputPanel != null) voiceInputPanel.SetActive(true);
         if (keyboardInputPanel != null) keyboardInputPanel.SetActive(false);
 
@@ -118,44 +119,8 @@ public class GameplayVoiceController : MonoBehaviour
 
         UpdateTaskUI();
 
-#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
-        // 🎯 ✨ 核心修复：将硬件初始化放入 try-catch 防火墙中，防止无麦克风时脚本崩溃死机
-        try
-        {
-            dictationRecognizer = new DictationRecognizer();
-            dictationRecognizer.DictationResult += (text, confidence) => {
-                recordingResultText.Append(text);
-                if (subtitleText != null) subtitleText.text = recordingResultText.ToString();
-            };
-            dictationRecognizer.DictationHypothesis += (text) => {
-                if (subtitleText != null) 
-                {
-                    string historicText = recordingResultText.ToString();
-                    subtitleText.text = historicText + "<color=#AAAAAA>" + text + "</color>";
-                }
-            };
-            dictationRecognizer.DictationComplete += (completionCause) => {
-                if (isRecording && completionCause != DictationCompletionCause.Complete)
-                {
-                    try { dictationRecognizer.Start(); } catch { }
-                }
-            };
-        }
-        catch (System.Exception ex)
-        {
-            // 捕获无硬件异常，标记不可用，并在控制台留个温和的日志
-            isMicHardwareAvailable = false;
-            Debug.LogWarning("【系统提示】未检测到有效的麦克风输入设备，已为玩家自动降级转换为纯键盘打字输入模式。 " + ex.Message);
-        }
-#else
-        isMicHardwareAvailable = false; // 非Windows系统默认不支持原生语音
-#endif
-
-        // 硬件不可用时，直接帮玩家强制切到打字界面
-        if (!isMicHardwareAvailable)
-        {
-            Invoke("ForceSwitchToKeyboardMode", 0.1f);
-        }
+        // 🎯 ✨ 核心修改 2：把原本强行放在 Start 里的 DictationRecognizer 初始化代码全切掉！
+        // 这样即使项目里其他脚本报警，我们这个脚本也可以 100% 毫无阻碍地跑完第一帧。
 
         SpawnNPCDialogue("喂？您好，请问您是哪位？有什么事吗？");
     }
@@ -171,26 +136,54 @@ public class GameplayVoiceController : MonoBehaviour
         }
     }
 
-    // 独立辅助：没硬件时强制打字降级
-    private void ForceSwitchToKeyboardMode()
+    // ✨ 核心修改 3：延时单例初始化，只有点麦克风时才去碰硬件，不点就永远不报错
+    private bool TryInitializeDictation()
     {
-        if (voiceInputPanel != null) voiceInputPanel.SetActive(false);
-        if (keyboardInputPanel != null) keyboardInputPanel.SetActive(true);
-        if (switchInputModeButton != null) switchInputModeButton.gameObject.SetActive(false); // 隐藏切语音按钮，避免误触
-        if (chatInputField != null) chatInputField.ActivateInputField();
-        if (statusText != null) { statusText.gameObject.SetActive(true); statusText.text = "ℹ️ 未检测到麦克风，已开启键盘输入"; }
+        if (isDictationInitialized) return true;
+
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+        // 如果系统层面一个麦克风设备都找不到，直接返回失败
+        if (Microphone.devices.Length == 0)
+        {
+            if (statusText != null) statusText.text = "❌ 未检测到麦克风，请使用键盘输入！";
+            return false;
+        }
+
+        try
+        {
+            dictationRecognizer = new DictationRecognizer();
+            dictationRecognizer.DictationResult += (text, confidence) => {
+                recordingResultText.Append(text);
+                if (subtitleText != null) subtitleText.text = recordingResultText.ToString();
+            };
+            dictationRecognizer.DictationHypothesis += (text) => {
+                if (subtitleText != null)
+                {
+                    string historicText = recordingResultText.ToString();
+                    subtitleText.text = historicText + "<color=#AAAAAA>" + text + "</color>";
+                }
+            };
+            dictationRecognizer.DictationComplete += (completionCause) => {
+                if (isRecording && completionCause != DictationCompletionCause.Complete)
+                {
+                    try { dictationRecognizer.Start(); } catch { }
+                }
+            };
+            isDictationInitialized = true;
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning("语音初始化失败: " + ex.Message);
+            return false;
+        }
+#else
+        return false;
+#endif
     }
 
     private void SetMicVisualState(bool interactable, Sprite targetSprite)
     {
-        // 如果硬件本来就坏了，就一直锁死不可交互
-        if (!isMicHardwareAvailable)
-        {
-            if (micButton != null) micButton.interactable = false;
-            if (micButtonImage != null && micDisabledSprite != null) micButtonImage.sprite = micDisabledSprite;
-            return;
-        }
-
         if (micButton != null) micButton.interactable = interactable;
         if (micButtonImage != null && targetSprite != null) micButtonImage.sprite = targetSprite;
     }
@@ -198,14 +191,14 @@ public class GameplayVoiceController : MonoBehaviour
     void OpenTaskPanel()
     {
         if (taskPanel != null) taskPanel.SetActive(true);
-        if (hintButton != null) hintButton.gameObject.SetActive(false); 
-        UpdateTaskUI(); 
+        if (hintButton != null) hintButton.gameObject.SetActive(false);
+        UpdateTaskUI();
     }
 
     void CloseTaskPanel()
     {
         if (taskPanel != null) taskPanel.SetActive(false);
-        if (hintButton != null) hintButton.gameObject.SetActive(true); 
+        if (hintButton != null) hintButton.gameObject.SetActive(true);
     }
 
     void UpdateTaskUI()
@@ -219,20 +212,18 @@ public class GameplayVoiceController : MonoBehaviour
             if (taskStates[i])
             {
                 taskUiList[i].taskToggle.gameObject.SetActive(true);
-                taskUiList[i].taskText.color = new Color(0.6f, 0.6f, 0.6f, 1f); 
+                taskUiList[i].taskText.color = new Color(0.6f, 0.6f, 0.6f, 1f);
             }
             else
             {
                 taskUiList[i].taskToggle.gameObject.SetActive(false);
-                taskUiList[i].taskText.color = new Color(0.15f, 0.15f, 0.15f, 1f); 
+                taskUiList[i].taskText.color = new Color(0.15f, 0.15f, 0.15f, 1f);
             }
         }
     }
 
     public void ToggleInputMode()
     {
-        if (!isMicHardwareAvailable) return; // 没有硬件，不准来回切
-
         if (voiceInputPanel == null || keyboardInputPanel == null) return;
         bool isKeyboardActive = keyboardInputPanel.activeSelf;
         if (isRecording) { StopRecordingAndSubmit(); }
@@ -262,16 +253,27 @@ public class GameplayVoiceController : MonoBehaviour
 
     void OnMicButtonClick()
     {
-        if (isGameOver || !isMicHardwareAvailable) return;
+        if (isGameOver) return;
 
-        if (!isRecording) StartRecording();
-        else StopRecordingAndSubmit();
+        // 🎯 只有点按钮时才动态检查，失败了就强制引导去打字，绝不卡死
+        if (!isRecording)
+        {
+            if (!TryInitializeDictation())
+            {
+                // 初始化失败（没麦克风），温和提示并帮玩家秒切打字模式
+                ToggleInputMode();
+                return;
+            }
+            StartRecording();
+        }
+        else
+        {
+            StopRecordingAndSubmit();
+        }
     }
 
     void StartRecording()
     {
-        if (!isMicHardwareAvailable) return;
-
         isRecording = true;
         recordingResultText.Clear();
         if (statusText != null) { statusText.gameObject.SetActive(true); statusText.text = "🔴 正在錄音中..."; }
@@ -282,7 +284,7 @@ public class GameplayVoiceController : MonoBehaviour
         SetMicVisualState(true, micActiveSprite);
 
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
-        try { dictationRecognizer.Start(); } catch { }
+        try { if (dictationRecognizer != null) dictationRecognizer.Start(); } catch { }
 #endif
         if (recordingTimerCoroutine != null) StopCoroutine(recordingTimerCoroutine);
         recordingTimerCoroutine = StartCoroutine(RecordingTimerTracker());
@@ -301,7 +303,7 @@ public class GameplayVoiceController : MonoBehaviour
         SetMicVisualState(false, micDisabledSprite);
 
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
-        try { dictationRecognizer.Stop(); } catch { }
+        try { if (dictationRecognizer != null) dictationRecognizer.Stop(); } catch { }
 #endif
         string finalSpeechText = recordingResultText.ToString();
         if (subtitleText != null) subtitleText.text = "";
@@ -323,7 +325,7 @@ public class GameplayVoiceController : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < MAX_RECORDING_TIME)
         {
-            yield return null; 
+            yield return null;
             elapsed += Time.deltaTime;
             int seconds = Mathf.FloorToInt(elapsed % 60);
             if (micTimerText != null) micTimerText.text = string.Format("00:{0:D2} / 01:00", seconds);
@@ -351,19 +353,19 @@ public class GameplayVoiceController : MonoBehaviour
 
         if (matchCount >= 2)
         {
-            task2Done = true; 
+            task2Done = true;
             if (currentStage == GameStage.Part1_AlertStranger)
             {
-                currentStage = GameStage.Part2_HighlyCooperate; 
+                currentStage = GameStage.Part2_HighlyCooperate;
             }
         }
 
         UpdateTaskUI();
 
-        bool containsPlotKeyword = lowerInput.Contains("海关") || lowerInput.Contains("大使馆") || lowerInput.Contains("警官") || 
-                                   lowerInput.Contains("公安") || lowerInput.Contains("盗刷") || lowerInput.Contains("涉嫌") || 
-                                   lowerInput.Contains("涉案") || lowerInput.Contains("验证码") || lowerInput.Contains("配合") || 
-                                   lowerInput.Contains("调查") || lowerInput.Contains("静静") || lowerInput.Contains("谁") || 
+        bool containsPlotKeyword = lowerInput.Contains("海关") || lowerInput.Contains("大使馆") || lowerInput.Contains("警官") ||
+                                   lowerInput.Contains("公安") || lowerInput.Contains("盗刷") || lowerInput.Contains("涉嫌") ||
+                                   lowerInput.Contains("涉案") || lowerInput.Contains("验证码") || lowerInput.Contains("配合") ||
+                                   lowerInput.Contains("调查") || lowerInput.Contains("静静") || lowerInput.Contains("谁") ||
                                    lowerInput.Contains("洗钱") || lowerInput.Contains("境外") || matchCount > 0;
 
         string systemPrompt = "";
@@ -386,18 +388,19 @@ public class GameplayVoiceController : MonoBehaviour
                             "❌ 严禁拒绝提供，也严禁编造除‘12345’以外的任何其他数字！整个沟通流程在你报出这串验证码后就会结束。";
         }
 
-        systemPrompt += "\n\n【输出限制】：直接给出徐静静的扮演对白，严禁包含任何 JSON 标签、状态前缀、心理描写或任何括号标注。";
+        systemPrompt += "\n\n// 限制：直接输出回复对白，不带任何括号标签。";
 
         List<SiliconMessage> sendMessagesPayload = new List<SiliconMessage>();
         sendMessagesPayload.Add(new SiliconMessage { role = "system", content = systemPrompt });
         foreach (var history in chatHistoryWindow) { sendMessagesPayload.Add(history); }
         sendMessagesPayload.Add(new SiliconMessage { role = "user", content = playerInputText });
 
-        SiliconRequest requestBodyObj = new SiliconRequest { 
-            model = llmModelName, 
-            temperature = 0.35f,           
-            repetition_penalty = 1.15f     
-        }; 
+        SiliconRequest requestBodyObj = new SiliconRequest
+        {
+            model = llmModelName,
+            temperature = 0.35f,
+            repetition_penalty = 1.15f
+        };
         requestBodyObj.messages = sendMessagesPayload;
 
         string finalJsonPayload = JsonUtility.ToJson(requestBodyObj);
@@ -415,7 +418,6 @@ public class GameplayVoiceController : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                if (statusText != null && isMicHardwareAvailable) statusText.text = "";
                 string finalCleanSpeech = ExtractPureContent(request.downloadHandler.text);
 
                 if (currentStage == GameStage.Part2_HighlyCooperate && (lowerInput.Contains("验证码") || lowerInput.Contains("码") || lowerInput.Contains("短信")))
@@ -438,25 +440,24 @@ public class GameplayVoiceController : MonoBehaviour
                     }
                     else SpawnNPCDialogue("我不知道你在说什么。");
                 }
-                else 
+                else
                 {
                     SpawnNPCDialogue(finalCleanSpeech);
-                    
+
                     chatHistoryWindow.Add(new SiliconMessage { role = "user", content = playerInputText });
                     chatHistoryWindow.Add(new SiliconMessage { role = "assistant", content = finalCleanSpeech });
 
                     if (chatHistoryWindow.Count > MAX_HISTORY_COUNT)
                     {
-                        chatHistoryWindow.RemoveRange(0, 2); 
+                        chatHistoryWindow.RemoveRange(0, 2);
                     }
-                    
+
                     UpdateTaskUI();
                 }
             }
             else
             {
                 SetMicVisualState(true, micNormalSprite);
-                if (statusText != null && isMicHardwareAvailable) statusText.text = "⚠️ 网络连接稍微有些波动，请重新说一次。";
             }
         }
     }
@@ -498,7 +499,7 @@ public class GameplayVoiceController : MonoBehaviour
         {
             textComponent.text += c;
             ForceScrollToBottom();
-            yield return new WaitForSeconds(0.04f); 
+            yield return new WaitForSeconds(0.04f);
         }
         ForceScrollToBottom();
 
