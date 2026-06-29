@@ -12,12 +12,20 @@ using UnityEngine.Windows.Speech;
 
 public class GameplayVoiceController : MonoBehaviour
 {
-    [Header("API Config (极速轻量对齐版)")]
+    private enum GameStage
+    {
+        Stage0_EstablishTrust,     // 步骤1：初次接触（NPC警惕，不主动泄露隐私。但会根据玩家自报的官方身份和涉案话题，进行有来有回的灵和抗辩）
+        Stage1_VerifyIdentity,     // 步骤2：隐私开盒（核对隐私后防线彻底崩溃，转为无条件信任）
+        Stage2_EnterSystem,        // 步骤3：诱导配合
+        Stage3_GetVerificationCode // 步骤4：索要验证码（固定12345）
+    }
+
+    [Header("API Config")]
     public string apiKey = "sk-xxxxxxxxxxxxxxxxxxxx"; 
     private string llmUrl = "https://api.siliconflow.cn/v1/chat/completions";
     private string llmModelName = "Qwen/Qwen2.5-7B-Instruct";
 
-    [Header("UI Prefabs (氣泡動態渲染)")]
+    [Header("UI Prefabs")]
     public GameObject playerBubblePrefab; 
     public GameObject npcBubblePrefab;    
     public Transform chatContentTrans;    
@@ -27,31 +35,52 @@ public class GameplayVoiceController : MonoBehaviour
     public GameObject voiceWaveObject;     
     public Button micButton;
 
-    [Header("New UI Elements (⚠️ 请在面板中拖拽赋值)")]
-    [SerializeField] private TMP_Text subtitleText; // 麦克风上方的实时文字
-    [SerializeField] private TMP_Text timerText;    // 麦克风下方的倒计时组件
+    [Header("计时器组件")]
+    [SerializeField] private TMP_Text topCallTimerText; 
+    [SerializeField] private TMP_Text micTimerText;     
+    [SerializeField] private TMP_Text subtitleText;     
+
+    [Header("打字输入组件")]
+    [SerializeField] private Button switchInputModeButton; 
+    [SerializeField] private Button switchVoiceModeButton;  
+    [SerializeField] private GameObject voiceInputPanel;    
+    [SerializeField] private GameObject keyboardInputPanel; 
+    [SerializeField] private TMP_InputField chatInputField; 
 
     [Header("Anti-Fraud Gameplay Settings")]
     private int unrelatedCount = 0; 
     private bool isGameOver = false; 
 
-#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+    private GameStage currentStage = GameStage.Stage0_EstablishTrust;
+    private bool hasTriggeredUnconditionalTrust = false; 
+
+    // ✨ 精准滑动对话历史窗口容器（只存最近几轮，防止记忆过久产生污染）
+    private List<SiliconMessage> chatHistoryWindow = new List<SiliconMessage>();
+    private const int MAX_HISTORY_COUNT = 6; // 最多保留最近 6 条（3轮）对话记录
+
+    #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
     private DictationRecognizer dictationRecognizer;
-#endif
+    #endif
     private bool isRecording = false;
     private StringBuilder recordingResultText = new StringBuilder();
     private Coroutine recordingTimerCoroutine;
     private const float MAX_RECORDING_TIME = 60f; 
 
+    private float totalCallTime = 0f;
+
     void Start()
     {
         micButton.onClick.AddListener(OnMicButtonClick);
+        if (switchInputModeButton != null) switchInputModeButton.onClick.AddListener(ToggleInputMode);
+        if (switchVoiceModeButton != null) switchVoiceModeButton.onClick.AddListener(ToggleInputMode);
+        if (chatInputField != null) chatInputField.onSubmit.AddListener(OnInputFieldSubmit);
+
         if (voiceWaveObject != null) voiceWaveObject.SetActive(false);
         if (statusText != null) statusText.gameObject.SetActive(false); 
-        
-        // 初始化新 UI
         if (subtitleText != null) subtitleText.text = "";
-        if (timerText != null) timerText.gameObject.SetActive(false);
+        if (micTimerText != null) micTimerText.gameObject.SetActive(false);
+        if (voiceInputPanel != null) voiceInputPanel.SetActive(true);
+        if (keyboardInputPanel != null) keyboardInputPanel.SetActive(false);
 
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
         dictationRecognizer = new DictationRecognizer();
@@ -65,10 +94,8 @@ public class GameplayVoiceController : MonoBehaviour
                 string historicText = recordingResultText.ToString();
                 subtitleText.text = historicText + "<color=#AAAAAA>" + text + "</color>";
             }
-            if (statusText != null) statusText.text = "正在傾聽...";
         };
         dictationRecognizer.DictationComplete += (completionCause) => {
-            // 修复编译报错，当非正常完结且仍在录音状态时重启录音组件
             if (isRecording && completionCause != DictationCompletionCause.Complete)
             {
                 try { dictationRecognizer.Start(); } catch { }
@@ -78,43 +105,71 @@ public class GameplayVoiceController : MonoBehaviour
         SpawnNPCDialogue("喂？您好，请问您是哪位？有什么事吗？");
     }
 
+    void Update()
+    {
+        if (!isGameOver)
+        {
+            totalCallTime += Time.deltaTime;
+            int minutes = Mathf.FloorToInt(totalCallTime / 60f);
+            int seconds = Mathf.FloorToInt(totalCallTime % 60f);
+            if (topCallTimerText != null)
+            {
+                topCallTimerText.text = string.Format("{0:D2}:{1:D2}", minutes, seconds);
+            }
+        }
+    }
+
+    public void ToggleInputMode()
+    {
+        if (voiceInputPanel == null || keyboardInputPanel == null) return;
+        bool isKeyboardActive = keyboardInputPanel.activeSelf;
+        if (isRecording) { StopRecordingAndSubmit(); }
+
+        voiceInputPanel.SetActive(isKeyboardActive);
+        keyboardInputPanel.SetActive(!isKeyboardActive);
+
+        if (!isKeyboardActive && chatInputField != null)
+        {
+            chatInputField.ActivateInputField(); 
+        }
+    }
+
+    void OnInputFieldSubmit(string text)
+    {
+        if (isGameOver) return;
+        if (string.IsNullOrWhiteSpace(text)) return;
+
+        SpawnPlayerDialogue(text);
+        StartCoroutine(SendToSiliconFlowLLM(text));
+
+        chatInputField.text = "";
+        chatInputField.ActivateInputField();
+    }
+
     void OnMicButtonClick()
     {
         if (isGameOver)
         {
-            if (statusText != null) statusText.text = "❌ 电话已挂断，任务失败，请重新开始游戏。";
+            if (statusText != null) statusText.text = "❌ 电话已挂断，任务失败。";
             return;
         }
 
-        if (!isRecording)
-        {
-            StartRecording();
-        }
-        else
-        {
-            StopRecordingAndSubmit();
-        }
+        if (!isRecording) StartRecording();
+        else StopRecordingAndSubmit();
     }
 
     void StartRecording()
     {
         isRecording = true;
         recordingResultText.Clear();
-        
         if (statusText != null) { statusText.gameObject.SetActive(true); statusText.text = "🔴 正在錄音中..."; }
         if (voiceWaveObject != null) voiceWaveObject.SetActive(true);
         if (subtitleText != null) subtitleText.text = "准备倾听...";
-        
-        if (timerText != null)
-        {
-            timerText.gameObject.SetActive(true);
-            timerText.text = "00:00 / 01:00";
-        }
+        if (micTimerText != null) { micTimerText.gameObject.SetActive(true); micTimerText.text = "00:00 / 01:00"; }
 
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
         try { dictationRecognizer.Start(); } catch { }
 #endif
-
         if (recordingTimerCoroutine != null) StopCoroutine(recordingTimerCoroutine);
         recordingTimerCoroutine = StartCoroutine(RecordingTimerTracker());
     }
@@ -126,7 +181,7 @@ public class GameplayVoiceController : MonoBehaviour
 
         if (recordingTimerCoroutine != null) StopCoroutine(recordingTimerCoroutine);
         if (voiceWaveObject != null) voiceWaveObject.SetActive(false);
-        if (timerText != null) timerText.gameObject.SetActive(false);
+        if (micTimerText != null) micTimerText.gameObject.SetActive(false);
         if (statusText != null) statusText.text = "⏳ 徐晶晶正在思考...";
 
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
@@ -140,10 +195,6 @@ public class GameplayVoiceController : MonoBehaviour
             SpawnPlayerDialogue(finalSpeechText);
             StartCoroutine(SendToSiliconFlowLLM(finalSpeechText));
         }
-        else
-        {
-            if (statusText != null) statusText.text = "未能聽清話術，請重試";
-        }
     }
 
     IEnumerator RecordingTimerTracker()
@@ -153,42 +204,103 @@ public class GameplayVoiceController : MonoBehaviour
         {
             yield return null; 
             elapsed += Time.deltaTime;
-            
             int seconds = Mathf.FloorToInt(elapsed % 60);
-            if (timerText != null)
-            {
-                timerText.text = string.Format("00:{0:D2} / 01:00", seconds);
-            }
+            if (micTimerText != null) micTimerText.text = string.Format("00:{0:D2} / 01:00", seconds);
         }
-
-        if (timerText != null) timerText.text = "01:00 / 01:00";
         StopRecordingAndSubmit();
     }
 
-    IEnumerator SendToSiliconFlowLLM(string speechText)
+    IEnumerator SendToSiliconFlowLLM(string playerInputText)
     {
-        // 简化大模型的输出负担，不再逼迫它吐出复杂的自定义前缀标记
-        string systemPrompt = 
-            "你现在扮演模拟反诈游戏中的受害者NPC【徐晶晶】。\n" +
-            "【NPC画像】：\n" +
-            "- 姓名：徐晶晶，年龄：22岁，国际留学生，刚获得海外研究生Offer。\n" +
-            "- 心理状态：第一次长期独自在海外生活，学费由父母准备。遇到突发事件极容易紧张。\n" +
-            "- 软肋：高度重视研究生录取资格；担心签证和身份问题；缺乏法律知识，容易被权威身份影响和恐吓。\n\n" +
-            "【剧情背景与判定规则】：\n" +
-            "玩家是一名伪装身份的诈骗犯。流程步骤包括：1.冒充海关/大使馆建立信任；2.引导其相信身份被盗用；3.诱导进入案件验证系统；4.索要验证码（信任后可给出'123456'）。\n" +
-            "如果玩家说的话与上述反诈剧情主题（公检法、海关、大使馆、核对身份、涉及案件、验证码等）完全无关（例如聊到天气、日常寒暄、或者不知所云），你必须严格且仅回复这句话，不要带任何多余字眼：“我不知道你在说什么。”\n" +
-            "如果玩家说的话顺应上述诈骗流程（例如：‘我是中国海关’、‘我是大使馆的’、‘你涉嫌信息泄露’），请结合徐晶晶胆小、容易被权威吓到的性格，给出合理的、害怕又配合的对话反应。\n\n" +
-            "【输出格式限制】：\n" +
-            "请直接输出你对玩家的回话台词，严禁包含任何 JSON 标签、markdown 标记或前缀。";
+        string lowerInput = playerInputText.ToLower();
 
-        SiliconRequest requestBodyObj = new SiliconRequest();
-        requestBodyObj.model = llmModelName;
-        requestBodyObj.messages = new List<SiliconMessage>()
+        // 🎯 1. 严格条件递进状态机机制
+        if (!hasTriggeredUnconditionalTrust)
         {
-            new SiliconMessage { role = "system", content = systemPrompt },
-            new SiliconMessage { role = "user", content = speechText }
-        };
-        requestBodyObj.temperature = 0.2f; // 调低随机性，确保严格遵从剧本约束
+            if (lowerInput.Contains("13808") || lowerInput.Contains("22岁") || lowerInput.Contains("核对") || lowerInput.Contains("信息是") || lowerInput.Contains("身份证"))
+            {
+                currentStage = GameStage.Stage1_VerifyIdentity;
+                hasTriggeredUnconditionalTrust = true;
+            }
+        }
+        else
+        {
+            if (lowerInput.Contains("系统") || lowerInput.Contains("验证系统") || lowerInput.Contains("安全账户") || lowerInput.Contains("流程") || lowerInput.Contains("配合调查") || lowerInput.Contains("配合"))
+            {
+                currentStage = GameStage.Stage2_EnterSystem;
+            }
+            if (lowerInput.Contains("验证码") || lowerInput.Contains("短信"))
+            {
+                currentStage = GameStage.Stage3_GetVerificationCode;
+            }
+        }
+
+        bool containsPlotKeyword = lowerInput.Contains("海关") || lowerInput.Contains("大使馆") || lowerInput.Contains("警官") || 
+                                   lowerInput.Contains("公安") || lowerInput.Contains("盗刷") || lowerInput.Contains("涉嫌") || 
+                                   lowerInput.Contains("涉案") || lowerInput.Contains("验证码") || lowerInput.Contains("配合") || 
+                                   lowerInput.Contains("调查") || lowerInput.Contains("晶晶") || lowerInput.Contains("谁") || 
+                                   lowerInput.Contains("洗钱") || lowerInput.Contains("境外") || hasTriggeredUnconditionalTrust;
+
+        // 🎯 2. 精调动态控型 System Prompt（不要死板例句，要行为逻辑）
+        string systemPrompt = 
+            "你现在扮演一个普通的22岁刚大学毕业的年轻女孩【徐晶晶】。你性格胆小敏感、重视前途，具备正常的智商和多轮对话逻辑。\n" +
+            "【当前最新游戏关卡命令（无条件服从）】：\n";
+
+        switch (currentStage)
+        {
+            case GameStage.Stage0_EstablishTrust:
+                systemPrompt += "【当前阶段：海关接触/身份初次建立初期】\n" +
+                                "⚠️核心人设铁律：你目前接到了一个电话，并且通过对话已经知道了对方自称是‘海关/官方人员’，也听到了关于你涉案（如境外盗刷）的控诉。\n" +
+                                "你的应对逻辑是：【顺着对方抛出的话，表现出疑惑、本能的极力否认与抗辩】！\n" +
+                                "- 如果对方说了‘我是海关’，你就必须针对海关和涉案进行灵活回应（例如：‘海关？我没有去过境外啊，是不是搞错了？’ ）。\n" +
+                                "- ❌ 绝对禁止复读或机械性地连续追问对方‘你是哪位/有什么事吗’！你已经知道他是海关了，针对‘涉案/盗刷’进行互动辩解！\n" +
+                                "- ❌ 绝对禁止主动泄露你的任何具体留学隐私（如签证、录取通知书、学费）。别人没有说破，你就绝对不打自招。";
+                break;
+
+            case GameStage.Stage1_VerifyIdentity:
+                systemPrompt += "【当前阶段：隐私遭核对，防线彻底破防】\n" +
+                                "对方现在正在准确报出或跟你核对你的关键隐私（如年龄、电话）。你惊恐地发现海关对自己了如指掌，防线彻底灰飞烟灭，转为对官方无条件的信任和巨大的惊慌！\n" +
+                                "请用极为惊慌的语气配合：‘对……这就是我的信息，长官，我真的没有做过违法的事！怎么会这样啊……’ 绝对不要主动去抢后面系统验证的台词，等对方下达指示。";
+                break;
+
+            case GameStage.Stage2_EnterSystem:
+                systemPrompt += "【当前阶段：急切寻求清白，全面配合调查】\n" +
+                                "为了洗清罪名，你现在百依百顺。请积极地顺着玩家提及的‘系统验证/配合调查’流程，主动追问接下来该怎么具体操作。";
+                break;
+
+            case GameStage.Stage3_GetVerificationCode:
+                systemPrompt += "【当前阶段：提供验证码】\n" +
+                                "你决定配合对方。你收到的验证码是【12345】。请用配合、急切的语气把验证码说出来（例如：‘长官，我的验证码是12345，您快帮我查查吧。’）。\n" +
+                                "❌ 严禁连续重复‘求求求’、‘拜托拜托’等单一字词！保持正常的、连贯的说话语序！";
+                break;
+        }
+
+        if (!containsPlotKeyword)
+        {
+            systemPrompt += "\n【兜底规则】如果玩家当前说的话和上述剧情完全不沾边（如纯闲聊），你才被允许回复：“我不知道你在说什么。”";
+        }
+
+        systemPrompt += "\n\n【输出硬性限制】：直接给出徐晶晶的扮演台词。严禁包含任何 JSON 标签、状态前缀、心理描写或任何括号标注。";
+
+        // 🎯 3. 滑动历史窗口拼接（既保持短期记忆的灵动连贯，又防止长线历史污染）
+        List<SiliconMessage> sendMessagesPayload = new List<SiliconMessage>();
+        sendMessagesPayload.Add(new SiliconMessage { role = "system", content = systemPrompt });
+        
+        // 追加最近几轮的局部对话历史
+        foreach (var history in chatHistoryWindow)
+        {
+            sendMessagesPayload.Add(history);
+        }
+        
+        // 加入当前最新的玩家输入
+        sendMessagesPayload.Add(new SiliconMessage { role = "user", content = playerInputText });
+
+        SiliconRequest requestBodyObj = new SiliconRequest { 
+            model = llmModelName, 
+            temperature = 0.45f,           // 适当提高到 0.45，大幅增强语义理解与回复的灵动度
+            repetition_penalty = 1.15f     
+        }; 
+        requestBodyObj.messages = sendMessagesPayload;
 
         string finalJsonPayload = JsonUtility.ToJson(requestBodyObj);
 
@@ -197,7 +309,6 @@ public class GameplayVoiceController : MonoBehaviour
             byte[] bodyRaw = Encoding.UTF8.GetBytes(finalJsonPayload);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
-            
             request.timeout = 15;
             request.SetRequestHeader("Content-Type", "application/json");
             request.SetRequestHeader("Authorization", "Bearer " + apiKey.Trim());
@@ -207,14 +318,16 @@ public class GameplayVoiceController : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 if (statusText != null) statusText.gameObject.SetActive(false);
-                
-                string rawResponse = request.downloadHandler.text;
-                string finalCleanSpeech = ExtractPureContent(rawResponse);
+                string finalCleanSpeech = ExtractPureContent(request.downloadHandler.text);
 
-                // ✨ 客户端鲁棒性安全双重判定机制
-                bool isUnrelatedReply = finalCleanSpeech.Contains("我不知道你在说什么") || 
-                                        finalCleanSpeech == "我不知道你在说什么。" || 
-                                        finalCleanSpeech.Length < 3; // 过滤极端过短返回
+                // 客户端强拦截置换验证码逻辑
+                if (currentStage == GameStage.Stage3_GetVerificationCode)
+                {
+                    finalCleanSpeech = Regex.Replace(finalCleanSpeech, @"\d+", "12345");
+                }
+
+                bool isUnrelatedReply = !containsPlotKeyword && 
+                                        (finalCleanSpeech.Contains("我不知道你在说什么") || finalCleanSpeech.Length < 3);
 
                 if (isUnrelatedReply)
                 {
@@ -225,21 +338,23 @@ public class GameplayVoiceController : MonoBehaviour
                         if (statusText != null) { statusText.gameObject.SetActive(true); statusText.text = "❌ 对方挂断了电话，任务失败。"; }
                         SpawnNPCDialogue("（嘟嘟嘟…… 对方已经挂断了电话）");
                     }
-                    else
+                    else SpawnNPCDialogue("我不知道你在说什么。");
+                }
+                else 
+                {
+                    // 完美应对玩家的反诈剧情对白
+                    SpawnNPCDialogue(finalCleanSpeech);
+                    
+                    // ✨ 将本轮真实有效的对话推入滑动窗口历史
+                    chatHistoryWindow.Add(new SiliconMessage { role = "user", content = playerInputText });
+                    chatHistoryWindow.Add(new SiliconMessage { role = "assistant", content = finalCleanSpeech });
+
+                    // 如果超出了设定的最大局部记忆长度，裁剪掉最老的历史，防止污染
+                    if (chatHistoryWindow.Count > MAX_HISTORY_COUNT)
                     {
-                        SpawnNPCDialogue("我不知道你在说什么。");
+                        chatHistoryWindow.RemoveRange(0, 2); // 移除最老的一轮（一问一答）
                     }
                 }
-                else
-                {
-                    // 顺应正常反诈剧情，输出徐晶晶害怕、动摇的对白
-                    SpawnNPCDialogue(finalCleanSpeech);
-                }
-            }
-            else
-            {
-                if (statusText != null) statusText.text = "❌ 信号不良，对方似乎挂断了...";
-                Debug.LogError($"【网络拦截异常】: {request.downloadHandler.text}");
             }
         }
     }
@@ -249,17 +364,10 @@ public class GameplayVoiceController : MonoBehaviour
         try
         {
             Match match = Regex.Match(json, @"_?\""content\""\s*:\s*\""([^\""\\]*(?:\\.[^\""\\]*)*)\""");
-            if (match.Success)
-            {
-                string content = match.Groups[1].Value;
-                content = Regex.Unescape(content);
-                
-                content = content.Replace("`", "").Replace("{", "").Replace("}", "").Replace("\"", "");
-                return content.Trim();
-            }
+            if (match.Success) return Regex.Unescape(match.Groups[1].Value).Replace("`", "").Replace("{", "").Replace("}", "").Trim();
         }
         catch { }
-        return "（喂？说话呀，不说我挂了啊...）";
+        return "我不知道你在说什么。";
     }
 
     void SpawnPlayerDialogue(string text)
@@ -288,6 +396,7 @@ public class GameplayVoiceController : MonoBehaviour
             ForceScrollToBottom();
             yield return new WaitForSeconds(0.04f); 
         }
+        ForceScrollToBottom();
     }
 
     void ForceScrollToBottom()
@@ -307,5 +416,10 @@ public class GameplayVoiceController : MonoBehaviour
     }
 
     [System.Serializable] class SiliconMessage { public string role; public string content; }
-    [System.Serializable] class SiliconRequest { public string model; public List<SiliconMessage> messages; public float temperature; }
+    [System.Serializable] class SiliconRequest { 
+        public string model; 
+        public List<SiliconMessage> messages; 
+        public float temperature; 
+        public float repetition_penalty; 
+    }
 }
