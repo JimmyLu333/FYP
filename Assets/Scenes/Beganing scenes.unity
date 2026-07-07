@@ -6375,7 +6375,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.7058824}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -8806,8 +8806,12 @@ MonoBehaviour:
   openingImage1: {fileID: 21300000, guid: 161c42cc57d6d39438270b572a118fc8, type: 3}
   openingImage2: {fileID: 21300000, guid: cd0db0dd7d784c54989fdfeb2716db3e, type: 3}
   openingImage3: {fileID: 21300000, guid: b2dab33942b2c7048ba05066a055142e, type: 3}
+  openingImage4: {fileID: 0}
+  openingImage5: {fileID: 0}
   switchToImage2AtLine: 4
   switchToImage3AtLine: 5
+  switchToImage4AtLine: 6
+  switchToImage5AtLine: 8
   backgroundImage: {fileID: 1662590301}
   fadeImage: {fileID: 202070326}
   nameTMP: {fileID: 562167671}
