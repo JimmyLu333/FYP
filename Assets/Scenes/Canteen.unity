@@ -6227,7 +6227,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.004158, y: 0.00012016}
+  m_AnchoredPosition: {x: 0.013846, y: 18.405}
   m_SizeDelta: {x: 1730.4, y: 302.56}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &978516136
@@ -6359,8 +6359,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.000022888, y: -389}
-  m_SizeDelta: {x: 1730.3723, y: 302.5595}
+  m_AnchoredPosition: {x: 0.0000038147, y: -384}
+  m_SizeDelta: {x: 1730.3723, y: 265.7504}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &992621839
 MonoBehaviour:
@@ -8819,9 +8819,9 @@ MonoBehaviour:
     dialogueText: "\u6210\u5E74\u4EBA\u3002\u603B\u8981\u4E3A\u81EA\u5DF1\u7684\u9009\u62E9\u8D1F\u8D23\u3002"
   - characterName: "\u9AD8\u5584"
     dialogueText: "\u5BF9\u5427\uFF0C\u9648\u9ED8~"
-  openingImage1: {fileID: 21300000, guid: 27f536086c9f11e44abf959a705d101f, type: 3}
-  openingImage2: {fileID: 21300000, guid: 77a091400d647ae439c83fa299335b82, type: 3}
-  openingImage3: {fileID: 21300000, guid: 39d216cc5ee19ef45b7d8bb24248af08, type: 3}
+  openingImage1: {fileID: 21300000, guid: c659ff2fc1b75664a85f63f44d830c1a, type: 3}
+  openingImage2: {fileID: 21300000, guid: e8fc53dacd6088c4299c724ca130d2ac, type: 3}
+  openingImage3: {fileID: 21300000, guid: 2a12a3677ff63854aa381d979a6cfb27, type: 3}
   openingImage4: {fileID: 21300000, guid: 3e54ebb3fb8edc44bb5296bf04b0067e, type: 3}
   openingImage5: {fileID: 21300000, guid: 6519c162095f17a4dbbfde1b7ced2c21, type: 3}
   switchToImage2AtLine: 2
@@ -10009,7 +10009,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 27f536086c9f11e44abf959a705d101f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c659ff2fc1b75664a85f63f44d830c1a, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
