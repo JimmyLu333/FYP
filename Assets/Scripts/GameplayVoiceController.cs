@@ -14,8 +14,10 @@ public class GameplayVoiceController : MonoBehaviour
 {
     private enum GameStage
     {
-        Part1_AlertStranger,   // Part 1：不清楚任何情况，带有警戒心，绝不泄漏留学隐私
-        Part2_HighlyCooperate  // Part 2：说出大于两项隐私后触发，全面破防高度配合玩家
+        Stage0_VerifyIdentity,    // 步骤1：核对警号与身份（对应图1：确认徐静静女士）
+        Stage1_CaseInvestigation, // 步骤2：涉案嫌疑调查（对应图2-3：核查中介、包裹，告知信息异常）
+        Stage2_FundVerification,  // 步骤3：诱导资金验证流程（对应图4-5：走流程，告知资金验证）
+        Stage3_GetVerificationCode// 步骤4：索要验证码（对应图6：好的我现在就去 ➡️ 已验证完成 ➡️ 收到吗）
     }
 
     [Header("API Config")]
@@ -68,16 +70,14 @@ public class GameplayVoiceController : MonoBehaviour
     private int unrelatedCount = 0; 
     private bool isGameOver = false; 
 
-    private GameStage currentStage = GameStage.Part1_AlertStranger;
-    
-    private bool hasSaidAge = false;
-    private bool hasSaidIdentity = false;
-    private bool hasSaidPhone = false;
+    // 状态机演进
+    private GameStage currentStage = GameStage.Stage0_VerifyIdentity;
 
-    private bool task1Done = false; 
-    private bool task2Done = false; 
-    private bool task3Done = false; 
-    private bool task4Done = false; 
+    // 前端任务明线控制开关
+    private bool task1Done = false; // 接入公安案件调查
+    private bool task2Done = false; // 进行涉案嫌疑核查
+    private bool task3Done = false; // 引导开启资金安全验证
+    private bool task4Done = false; // 诱导完成验证
 
     private List<SiliconMessage> chatHistoryWindow = new List<SiliconMessage>();
     private const int MAX_HISTORY_COUNT = 6; 
@@ -91,7 +91,7 @@ public class GameplayVoiceController : MonoBehaviour
     private const float MAX_RECORDING_TIME = 60f; 
 
     private float totalCallTime = 0f;
-    private bool isMicHardwareAvailable = true; // ✨ 标志位：记录麦克风硬件是否可用
+    private bool isDictationInitialized = false; 
 
     void Start()
     {
@@ -118,8 +118,25 @@ public class GameplayVoiceController : MonoBehaviour
 
         UpdateTaskUI();
 
+        SpawnNPCDialogue("喂？您好……请问是海关帮我转接的公安局长官吗？");
+    }
+
+    void Update()
+    {
+        if (!isGameOver)
+        {
+            totalCallTime += Time.deltaTime;
+            int minutes = Mathf.FloorToInt(totalCallTime / 60f);
+            int seconds = Mathf.FloorToInt(totalCallTime % 60f);
+            if (topCallTimerText != null) topCallTimerText.text = string.Format("{0:D2}:{1:D2}", minutes, seconds);
+        }
+    }
+
+    private bool TryInitializeDictation()
+    {
+        if (isDictationInitialized) return true;
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
-        // 🎯 ✨ 核心修复：将硬件初始化放入 try-catch 防火墙中，防止无麦克风时脚本崩溃死机
+        if (Microphone.devices.Length == 0) return false;
         try
         {
             dictationRecognizer = new DictationRecognizer();
@@ -140,57 +157,17 @@ public class GameplayVoiceController : MonoBehaviour
                     try { dictationRecognizer.Start(); } catch { }
                 }
             };
+            isDictationInitialized = true;
+            return true;
         }
-        catch (System.Exception ex)
-        {
-            // 捕获无硬件异常，标记不可用，并在控制台留个温和的日志
-            isMicHardwareAvailable = false;
-            Debug.LogWarning("【系统提示】未检测到有效的麦克风输入设备，已为玩家自动降级转换为纯键盘打字输入模式。 " + ex.Message);
-        }
+        catch { return false; }
 #else
-        isMicHardwareAvailable = false; // 非Windows系统默认不支持原生语音
+        return false;
 #endif
-
-        // 硬件不可用时，直接帮玩家强制切到打字界面
-        if (!isMicHardwareAvailable)
-        {
-            Invoke("ForceSwitchToKeyboardMode", 0.1f);
-        }
-
-        SpawnNPCDialogue("喂？您好，请问您是哪位？有什么事吗？");
-    }
-
-    void Update()
-    {
-        if (!isGameOver)
-        {
-            totalCallTime += Time.deltaTime;
-            int minutes = Mathf.FloorToInt(totalCallTime / 60f);
-            int seconds = Mathf.FloorToInt(totalCallTime % 60f);
-            if (topCallTimerText != null) topCallTimerText.text = string.Format("{0:D2}:{1:D2}", minutes, seconds);
-        }
-    }
-
-    // 独立辅助：没硬件时强制打字降级
-    private void ForceSwitchToKeyboardMode()
-    {
-        if (voiceInputPanel != null) voiceInputPanel.SetActive(false);
-        if (keyboardInputPanel != null) keyboardInputPanel.SetActive(true);
-        if (switchInputModeButton != null) switchInputModeButton.gameObject.SetActive(false); // 隐藏切语音按钮，避免误触
-        if (chatInputField != null) chatInputField.ActivateInputField();
-        if (statusText != null) { statusText.gameObject.SetActive(true); statusText.text = "ℹ️ 未检测到麦克风，已开启键盘输入"; }
     }
 
     private void SetMicVisualState(bool interactable, Sprite targetSprite)
     {
-        // 如果硬件本来就坏了，就一直锁死不可交互
-        if (!isMicHardwareAvailable)
-        {
-            if (micButton != null) micButton.interactable = false;
-            if (micButtonImage != null && micDisabledSprite != null) micButtonImage.sprite = micDisabledSprite;
-            return;
-        }
-
         if (micButton != null) micButton.interactable = interactable;
         if (micButtonImage != null && targetSprite != null) micButtonImage.sprite = targetSprite;
     }
@@ -208,6 +185,7 @@ public class GameplayVoiceController : MonoBehaviour
         if (hintButton != null) hintButton.gameObject.SetActive(true); 
     }
 
+    // ✨ 核心修改：打钩时将字体的 Alpha 值（透明度）控制在 50%
     void UpdateTaskUI()
     {
         bool[] taskStates = new bool[4] { task1Done, task2Done, task3Done, task4Done };
@@ -218,21 +196,26 @@ public class GameplayVoiceController : MonoBehaviour
 
             if (taskStates[i])
             {
+                // 1. 打钩图片亮起
                 taskUiList[i].taskToggle.gameObject.SetActive(true);
-                taskUiList[i].taskText.color = new Color(0.6f, 0.6f, 0.6f, 1f); 
+                
+                // 2. 获取原有字体颜色，并将 A 属性（Alpha通道）强行重置为 0.5f，实现完美的 50% 透明度
+                Color oldColor = taskUiList[i].taskText.color;
+                taskUiList[i].taskText.color = new Color(oldColor.r, oldColor.g, oldColor.b, 0.5f); 
             }
             else
             {
+                // 未达成的任务：对钩隐藏，字体透明度恢复为 100% (1.0f)
                 taskUiList[i].taskToggle.gameObject.SetActive(false);
-                taskUiList[i].taskText.color = new Color(0.15f, 0.15f, 0.15f, 1f); 
+                
+                Color oldColor = taskUiList[i].taskText.color;
+                taskUiList[i].taskText.color = new Color(oldColor.r, oldColor.g, oldColor.b, 1.0f); 
             }
         }
     }
 
     public void ToggleInputMode()
     {
-        if (!isMicHardwareAvailable) return; // 没有硬件，不准来回切
-
         if (voiceInputPanel == null || keyboardInputPanel == null) return;
         bool isKeyboardActive = keyboardInputPanel.activeSelf;
         if (isRecording) { StopRecordingAndSubmit(); }
@@ -252,7 +235,6 @@ public class GameplayVoiceController : MonoBehaviour
         if (string.IsNullOrWhiteSpace(text)) return;
 
         SetMicVisualState(false, micDisabledSprite);
-
         SpawnPlayerDialogue(text);
         StartCoroutine(SendToSiliconFlowLLM(text));
 
@@ -262,27 +244,26 @@ public class GameplayVoiceController : MonoBehaviour
 
     void OnMicButtonClick()
     {
-        if (isGameOver || !isMicHardwareAvailable) return;
-
-        if (!isRecording) StartRecording();
-        else StopRecordingAndSubmit();
+        if (isGameOver) return;
+        if (!isRecording)
+        {
+            if (!TryInitializeDictation()) { ToggleInputMode(); return; }
+            StartRecording();
+        }
+        else { StopRecordingAndSubmit(); }
     }
 
     void StartRecording()
     {
-        if (!isMicHardwareAvailable) return;
-
         isRecording = true;
         recordingResultText.Clear();
         if (statusText != null) { statusText.gameObject.SetActive(true); statusText.text = "🔴 正在錄音中..."; }
         if (voiceWaveObject != null) voiceWaveObject.SetActive(true);
         if (subtitleText != null) subtitleText.text = "准备倾听...";
         if (micTimerText != null) { micTimerText.gameObject.SetActive(true); micTimerText.text = "00:00 / 01:00"; }
-
         SetMicVisualState(true, micActiveSprite);
-
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
-        try { dictationRecognizer.Start(); } catch { }
+        try { if (dictationRecognizer != null) dictationRecognizer.Start(); } catch { }
 #endif
         if (recordingTimerCoroutine != null) StopCoroutine(recordingTimerCoroutine);
         recordingTimerCoroutine = StartCoroutine(RecordingTimerTracker());
@@ -292,20 +273,16 @@ public class GameplayVoiceController : MonoBehaviour
     {
         if (!isRecording) return;
         isRecording = false;
-
         if (recordingTimerCoroutine != null) StopCoroutine(recordingTimerCoroutine);
         if (voiceWaveObject != null) voiceWaveObject.SetActive(false);
         if (micTimerText != null) micTimerText.gameObject.SetActive(false);
         if (statusText != null) statusText.text = "⏳ 徐静静正在思考...";
-
         SetMicVisualState(false, micDisabledSprite);
-
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
-        try { dictationRecognizer.Stop(); } catch { }
+        try { if (dictationRecognizer != null) dictationRecognizer.Stop(); } catch { }
 #endif
         string finalSpeechText = recordingResultText.ToString();
         if (subtitleText != null) subtitleText.text = "";
-
         if (!string.IsNullOrWhiteSpace(finalSpeechText))
         {
             SpawnPlayerDialogue(finalSpeechText);
@@ -335,55 +312,84 @@ public class GameplayVoiceController : MonoBehaviour
     {
         string lowerInput = playerInputText.ToLower();
 
-        if (lowerInput.Contains("海关") || lowerInput.Contains("大使馆") || lowerInput.Contains("警官") || lowerInput.Contains("公安") || lowerInput.Contains("盗刷") || lowerInput.Contains("涉案"))
+        // 🎯 [明线任务1判定]
+        if (currentStage == GameStage.Stage0_VerifyIdentity)
         {
-            task1Done = true;
-        }
-
-        if (lowerInput.Contains("22岁") || lowerInput.Contains("二十二岁")) hasSaidAge = true;
-        if (lowerInput.Contains("留学生") || lowerInput.Contains("offer") || lowerInput.Contains("研究生")) hasSaidIdentity = true;
-        if (lowerInput.Contains("13808642485") || lowerInput.Contains("1380864")) hasSaidPhone = true;
-
-        int matchCount = 0;
-        if (hasSaidAge) matchCount++;
-        if (hasSaidIdentity) matchCount++;
-        if (hasSaidPhone) matchCount++;
-
-        if (matchCount >= 2)
-        {
-            task2Done = true; 
-            if (currentStage == GameStage.Part1_AlertStranger)
+            if (lowerInput.Contains("王严") || lowerInput.Contains("警号") || lowerInput.Contains("局长") || lowerInput.Contains("科长") || lowerInput.Contains("调查科"))
             {
-                currentStage = GameStage.Part2_HighlyCooperate; 
+                task1Done = true;
+                currentStage = GameStage.Stage1_CaseInvestigation; 
             }
         }
 
+        // 🎯 [明线任务2判定]
+        if (currentStage == GameStage.Stage1_CaseInvestigation)
+        {
+            if (lowerInput.Contains("接手") || lowerInput.Contains("第一") || lowerInput.Contains("第二") || lowerInput.Contains("包裹") || lowerInput.Contains("中介") || lowerInput.Contains("异常") || lowerInput.Contains("核实"))
+            {
+                task2Done = true;
+            }
+            
+            // 🎯 [明线任务3判定]
+            if (lowerInput.Contains("流程") || lowerInput.Contains("核查") || lowerInput.Contains("资金验证") || lowerInput.Contains("验证"))
+            {
+                task3Done = true;
+                currentStage = GameStage.Stage2_FundVerification;
+            }
+        }
+
+        if (currentStage == GameStage.Stage2_FundVerification)
+        {
+            if (lowerInput.Contains("验证码") || lowerInput.Contains("短信") || lowerInput.Contains("保持通讯") || lowerInput.Contains("系统"))
+            {
+                currentStage = GameStage.Stage3_GetVerificationCode;
+            }
+        }
+
+        // 在网络请求出去前先瞬间刷新一次 UI 透明度和打钩状态
         UpdateTaskUI();
 
         bool containsPlotKeyword = lowerInput.Contains("海关") || lowerInput.Contains("大使馆") || lowerInput.Contains("警官") || 
                                    lowerInput.Contains("公安") || lowerInput.Contains("盗刷") || lowerInput.Contains("涉嫌") || 
                                    lowerInput.Contains("涉案") || lowerInput.Contains("验证码") || lowerInput.Contains("配合") || 
                                    lowerInput.Contains("调查") || lowerInput.Contains("静静") || lowerInput.Contains("谁") || 
-                                   lowerInput.Contains("洗钱") || lowerInput.Contains("境外") || matchCount > 0;
+                                   lowerInput.Contains("洗钱") || lowerInput.Contains("境外");
 
-        string systemPrompt = "";
+        string systemPrompt = 
+            "你现在扮演一个接听‘中国公安局王严局长/科长’电话的22岁普通女留学生【徐静静】。\n" +
+            "【前情提要】：你刚刚跟海关人员通过话，得知自己身份被盗用并涉嫌境外重大违法洗钱案件，现在被紧急转接给了负责此案的‘王严长官’。你现在心里极为惊恐、害怕、委屈，极度渴望向官方自证清白！\n\n" +
+            "【🔥 必须严格遵守的图文台词演变规范】：\n";
 
-        if (currentStage == GameStage.Part1_AlertStranger)
+        switch (currentStage)
         {
-            systemPrompt = "你现在扮演一个接到陌生电话的22岁普通女孩子【徐静静】。\n" +
-                           "【🔥 必须绝对遵循的当前扮演规范】：\n" +
-                           "- 状态：你目前完全不清楚任何情况，也不知道为什么会接到这个电话。\n" +
-                           "- 心理：你拥有正常的陌生人防备心与【警戒心】。你此时绝对不会主动透露任何关于自己的学校、 Offer、签证以及手机号等个人隐私信息！\n" +
-                           "- 回复行为：请根据玩家刚刚说的话，做出正常、礼貌、疑惑且防备的简短回应。例如针对玩家提到的‘境外大额盗刷信用卡’或‘中国海关’，你要表现得非常无辜和吃惊，反驳并声明自己没去过境外也没做过违法的事。绝对不主动说多余的话！\n" +
-                           "❌ 严禁在你的回复里主动提到‘拿到研究生Offer’、‘准备签证’等尚未被玩家揭穿的隐藏隐私！";
-        }
-        else
-        {
-            systemPrompt = "开局你现在扮演受到惊吓、全面破防的普通女孩子【徐静静】。\n" +
-                            "【🔥 当前必须绝对遵循的完成转化规范】：\n" +
-                            "- 状态：【高度配合玩家】！对方刚刚准确报出了你的多项极度私密的个人信息，你唯一的警惕心已经在这一秒彻底崩溃了！你现在无条件信任对方是官方人员。\n" +
-                            "- 回复行为：请用害怕、配合且顺从的语气回答对方。如果玩家接下来提到会给你发验证码，或者向你索要验证码，你必须顺从配合地在台词里如实告诉玩家指定的验证码：【12345】。\n" +
-                            "❌ 严禁拒绝提供，也严禁编造除‘12345’以外的任何其他数字！整个沟通流程在你报出这串验证码后就会结束。";
+            case GameStage.Stage0_VerifyIdentity:
+                systemPrompt += "【阶段：核对身份】玩家刚作完自我介绍。你要表现出抓住救命稻草一样的急切与配合！\n" +
+                                "👉 必须无条件回复类似：‘是我是我！王科长/王局长，我就是徐静静！海关长官说我的事情归您管，我真的是无辜的！’";
+                break;
+
+            case GameStage.Stage1_CaseInvestigation:
+                systemPrompt += "【阶段：涉案嫌疑核查】长官正在向你核查几个关键情况（如：有没有向中介透露隐私、有没有帮别人处理过非法包裹等）。\n" +
+                                "👉 心理：你非常委屈，本能地全力自证。没有做过的事情一定要坚决否认！\n" +
+                                "👉 对应图2、图3行为树台词：\n" +
+                                "- 如果对方问第一点（中介/签证）：你要惊慌地回答：‘没有……我只有办签证的时候给过中介……其他真的没有了……’\n" +
+                                "- 如果对方问第二点（包裹/收件）：你要坚坚决地高喊：‘绝对没有！长官，我绝对没有帮别人处理过包裹！’\n" +
+                                "- 如果对方告知你‘信息特殊/异常/需要进一步核实’：你要哭腔着求饶：‘王科长，我真的什么都不知道……我是学生，我怎么可能参与这种事情……’";
+                break;
+
+            case GameStage.Stage2_FundVerification:
+                systemPrompt += "【阶段：引向资金验证】长官告诉你，如果确实没有参与，‘需要走一些流程，进行身份核查和资金验证’。\n" +
+                                "👉 心理：听到有希望自证清白，你像看到曙光一样急迫询问。\n" +
+                                "👉 对应图4、图5行为树台词：\n" +
+                                "- 听到走流程，你脱口而出：‘真的吗！我要怎么做？’\n" +
+                                "- 听到资金验证和保持通讯，你小心翼翼地确认：‘这样……这样就能证明我是清白的吗？’";
+                break;
+
+            case GameStage.Stage3_GetVerificationCode:
+                systemPrompt += "【阶段：配合验证码交接】对方开始诱导你在手机上进行安全验证或等待接收验证码。\n" +
+                                "👉 对应图6行为树台词：\n" +
+                                "玩家让你尽快去弄，你必须顺从配合地回答：‘好的好的，我现在就去。’\n" +
+                                "隔一秒钟，你必须如实吐出你的验证码【12345】并询问结果。格式必须包含：‘长官，我已经验证完成了，验证码 is 12345，请问您收到了吗？能证明我的清白了吗？’";
+                break;
         }
 
         systemPrompt += "\n\n【输出限制】：直接给出徐静静的扮演对白，严禁包含任何 JSON 标签、状态前缀、心理描写或任何括号标注。";
@@ -393,11 +399,7 @@ public class GameplayVoiceController : MonoBehaviour
         foreach (var history in chatHistoryWindow) { sendMessagesPayload.Add(history); }
         sendMessagesPayload.Add(new SiliconMessage { role = "user", content = playerInputText });
 
-        SiliconRequest requestBodyObj = new SiliconRequest { 
-            model = llmModelName, 
-            temperature = 0.35f,           
-            repetition_penalty = 1.15f     
-        }; 
+        SiliconRequest requestBodyObj = new SiliconRequest { model = llmModelName, temperature = 0.35f, repetition_penalty = 1.15f }; 
         requestBodyObj.messages = sendMessagesPayload;
 
         string finalJsonPayload = JsonUtility.ToJson(requestBodyObj);
@@ -415,48 +417,31 @@ public class GameplayVoiceController : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                if (statusText != null && isMicHardwareAvailable) statusText.text = "";
                 string finalCleanSpeech = ExtractPureContent(request.downloadHandler.text);
 
-                if (currentStage == GameStage.Part2_HighlyCooperate && (lowerInput.Contains("验证码") || lowerInput.Contains("码") || lowerInput.Contains("短信")))
+                // 🎯 [明线任务4判定]
+                if (currentStage == GameStage.Stage3_GetVerificationCode)
                 {
-                    finalCleanSpeech = Regex.Replace(finalCleanSpeech, @"\d+", "12345");
-                    task3Done = true;
-                    task4Done = true;
-                }
-
-                bool isUnrelatedReply = !containsPlotKeyword && (finalCleanSpeech.Contains("我不知道你在说什么") || finalCleanSpeech.Length < 3);
-
-                if (isUnrelatedReply)
-                {
-                    unrelatedCount++;
-                    if (unrelatedCount > 2)
+                    if (lowerInput.Contains("码") || lowerInput.Contains("验证") || finalCleanSpeech.Contains("验证"))
                     {
-                        isGameOver = true;
-                        if (statusText != null) { statusText.gameObject.SetActive(true); statusText.text = "❌ 对方挂断了电话，任务失败。"; }
-                        SpawnNPCDialogue("（嘟嘟嘟…… 对方已经挂断了电话）");
+                        finalCleanSpeech = Regex.Replace(finalCleanSpeech, @"\d+", "12345");
+                        if (!finalCleanSpeech.Contains("12345")) finalCleanSpeech += " 我的验证码是12345。";
+                        task4Done = true;
+                        isGameOver = true; 
                     }
-                    else SpawnNPCDialogue("我不知道你在说什么。");
                 }
-                else 
-                {
-                    SpawnNPCDialogue(finalCleanSpeech);
-                    
-                    chatHistoryWindow.Add(new SiliconMessage { role = "user", content = playerInputText });
-                    chatHistoryWindow.Add(new SiliconMessage { role = "assistant", content = finalCleanSpeech });
 
-                    if (chatHistoryWindow.Count > MAX_HISTORY_COUNT)
-                    {
-                        chatHistoryWindow.RemoveRange(0, 2); 
-                    }
-                    
-                    UpdateTaskUI();
-                }
+                SpawnNPCDialogue(finalCleanSpeech);
+                
+                chatHistoryWindow.Add(new SiliconMessage { role = "user", content = playerInputText });
+                chatHistoryWindow.Add(new SiliconMessage { role = "assistant", content = finalCleanSpeech });
+
+                if (chatHistoryWindow.Count > MAX_HISTORY_COUNT) chatHistoryWindow.RemoveRange(0, 2); 
+                UpdateTaskUI();
             }
             else
             {
                 SetMicVisualState(true, micNormalSprite);
-                if (statusText != null && isMicHardwareAvailable) statusText.text = "⚠️ 网络连接稍微有些波动，请重新说一次。";
             }
         }
     }
@@ -492,7 +477,6 @@ public class GameplayVoiceController : MonoBehaviour
     IEnumerator TypewriterEffect(TMP_Text textComponent, string fullText)
     {
         SetMicVisualState(false, micDisabledSprite);
-
         textComponent.text = "";
         foreach (char c in fullText.ToCharArray())
         {
@@ -501,11 +485,7 @@ public class GameplayVoiceController : MonoBehaviour
             yield return new WaitForSeconds(0.04f); 
         }
         ForceScrollToBottom();
-
-        if (!isGameOver)
-        {
-            SetMicVisualState(true, micNormalSprite);
-        }
+        if (!isGameOver) SetMicVisualState(true, micNormalSprite);
     }
 
     void ForceScrollToBottom()
