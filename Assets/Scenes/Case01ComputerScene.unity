@@ -17079,9 +17079,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 799508473}
+      - m_Target: {fileID: 1680596364}
         m_TargetAssemblyTypeName: UIMazeController, Assembly-CSharp
-        m_MethodName: 
+        m_MethodName: StartMaze
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
