@@ -5454,8 +5454,13 @@ MonoBehaviour:
         width: 160
         height: 30
     entryGroups: []
+<<<<<<< HEAD
     canvasScrollPosition: {x: 1382.4891, y: 395.02585}
     canvasZoom: 0.7600002
+=======
+    canvasScrollPosition: {x: 0, y: 19.726074}
+    canvasZoom: 0.73000026
+>>>>>>> feifeitest2
   - id: 3
     fields:
     - title: Title
@@ -6848,8 +6853,13 @@ MonoBehaviour:
         width: 160
         height: 30
     entryGroups: []
+<<<<<<< HEAD
     canvasScrollPosition: {x: 19.506119, y: 308.51862}
     canvasZoom: 0.80999994
+=======
+    canvasScrollPosition: {x: 4.2106934, y: 16.842041}
+    canvasZoom: 0.5700002
+>>>>>>> feifeitest2
   - id: 4
     fields:
     - title: Title
@@ -8438,8 +8448,13 @@ MonoBehaviour:
         width: 160
         height: 30
     entryGroups: []
+<<<<<<< HEAD
     canvasScrollPosition: {x: 507.75217, y: 175.45453}
     canvasZoom: 0.8800001
+=======
+    canvasScrollPosition: {x: 0, y: 100.42554}
+    canvasZoom: 0.94000006
+>>>>>>> feifeitest2
   - id: 5
     fields:
     - title: Title
